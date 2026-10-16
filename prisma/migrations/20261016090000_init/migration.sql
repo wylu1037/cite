@@ -1,4 +1,4 @@
--- 手写迁移：pgvector 扩展 + 向量列 + hnsw 索引（Prisma 不会为 Unsupported 列生成这些）
+-- 手写迁移：pgvector 扩展 + 向量列（Prisma 不会为 Unsupported 列生成这些；维度变更时同步 schema.prisma 与这里的 vector(N)）
 CREATE EXTENSION IF NOT EXISTS vector;
 
 CREATE TABLE "Doc" (

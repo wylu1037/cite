@@ -25,7 +25,12 @@ const client = new pg.Client({ connectionString: url });
 try {
   await client.connect();
 } catch (e) {
-  console.error(`[migrate] 连接数据库失败：${e instanceof Error ? e.message : e}`);
+  const detail = e && e.errors
+    ? e.errors.map((x) => x.message).join('; ')
+    : e instanceof Error
+      ? e.message
+      : String(e);
+  console.error(`[migrate] 连接数据库失败：${detail || e?.name || '未知错误'}`);
   process.exit(1);
 }
 let applied = 0;
