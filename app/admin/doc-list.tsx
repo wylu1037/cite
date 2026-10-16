@@ -51,6 +51,9 @@ export function DocList({ docs }: { docs: DocEntry[] }) {
           >
             新建文档
           </Link>
+          <Link href="/admin/meta" className="rounded-lg border px-3 py-1.5 text-sm">
+            侧栏配置
+          </Link>
           <button onClick={logout} className="rounded-lg border px-3 py-1.5 text-sm">
             退出登录
           </button>

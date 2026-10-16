@@ -3,8 +3,6 @@ title: 文档写作速览
 description: Markdown 常用语法与约定
 ---
 
-import { Callout } from 'fumadocs-ui/components/callout';
-
 # 文档写作速览
 
 ## 文件与标题
@@ -40,11 +38,9 @@ export function hello(name: string) {
 
 ## 提示框（MDX 组件）
 
-文档是 MDX，可以直接使用组件，例如：
+文档是 MDX，组件已全局就绪，**直接写标签即可，无需 import**：
 
 ```mdx
-import { Callout } from 'fumadocs-ui/components/callout';
-
 <Callout type="warn">需要特别注意的说明。</Callout>
 ```
 

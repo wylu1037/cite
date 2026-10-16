@@ -36,7 +36,7 @@ async function exists(p: string): Promise<boolean> {
   }
 }
 
-function parseTitle(content: string, fallback: string): string {
+export function parseTitle(content: string, fallback: string): string {
   const fm = content.match(/^---\r?\n([\s\S]*?)\r?\n---/);
   if (fm) {
     const t = fm[1].match(/^title:\s*(.+)$/m);
@@ -121,7 +121,7 @@ async function ensureRepo() {
   }
 }
 
-async function commitAll(message: string) {
+export async function commitAll(message: string) {
   await ensureRepo();
   await git(['add', '-A', '--', '.']);
   await git(['commit', '-m', message, '--', '.']).catch(() => {}); // 无变化时静默
