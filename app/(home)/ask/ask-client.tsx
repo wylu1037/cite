@@ -1,10 +1,67 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 
 type Source = { title: string; url: string; heading: string; content: string };
 type Msg = { role: 'user' | 'assistant'; content: string; sources?: Source[]; note?: string };
 type StreamEvent = { type?: string; text?: string; sources?: Source[]; message?: string };
+
+/** 轻量渲染：``` 代码块、**粗体**、`行内代码`、[n] 引用 → 可点击链接 */
+function AnswerText({ text, sources }: { text: string; sources?: Source[] }) {
+  const fence = text.split('```');
+  return (
+    <div className="whitespace-pre-wrap">
+      {fence.map((part, i) =>
+        i % 2 === 1 ? (
+          <pre key={i} className="my-2 overflow-x-auto rounded-lg bg-fd-muted px-3 py-2 text-xs">
+            {part.replace(/^[a-zA-Z]*\n/, '')}
+          </pre>
+        ) : (
+          <span key={i}>{inline(part, sources)}</span>
+        ),
+      )}
+    </div>
+  );
+}
+
+function inline(text: string, sources?: Source[]): ReactNode[] {
+  const out: ReactNode[] = [];
+  const re = /\*\*([^*]+)\*\*|`([^`]+)`|\[(\d+)\]/g;
+  let last = 0;
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(text))) {
+    if (m.index > last) out.push(text.slice(last, m.index));
+    if (m[1] !== undefined) {
+      out.push(<strong key={out.length}>{m[1]}</strong>);
+    } else if (m[2] !== undefined) {
+      out.push(
+        <code key={out.length} className="rounded bg-fd-muted px-1 py-0.5 text-xs">
+          {m[2]}
+        </code>,
+      );
+    } else {
+      const n = Number(m[3]);
+      const s = sources?.[n - 1];
+      if (s) {
+        out.push(
+          <a
+            key={out.length}
+            href={s.url}
+            title={s.title}
+            className="mx-0.5 rounded bg-fd-muted px-1 text-xs no-underline hover:underline"
+          >
+            [{n}]
+          </a>,
+        );
+      } else {
+        out.push(m[0]);
+      }
+    }
+    last = m.index + m[0].length;
+  }
+  if (last < text.length) out.push(text.slice(last));
+  return out;
+}
 
 export function AskClient() {
   const [messages, setMessages] = useState<Msg[]>([]);
@@ -89,11 +146,21 @@ export function AskClient() {
           <div
             className={
               m.role === 'user'
-                ? 'inline-block rounded-2xl bg-fd-primary px-4 py-2 text-sm text-fd-primary-foreground'
-                : 'rounded-2xl border px-4 py-3 text-sm whitespace-pre-wrap'
+                ? 'inline-block rounded-2xl bg-fd-primary px-4 py-2 text-sm whitespace-pre-wrap text-fd-primary-foreground'
+                : 'rounded-2xl border px-4 py-3 text-sm'
             }
           >
-            {m.role === 'assistant' && !m.content && busy ? '思考中…' : m.content}
+            {m.role === 'assistant' ? (
+              m.content ? (
+                <AnswerText text={m.content} sources={m.sources} />
+              ) : busy ? (
+                '思考中…'
+              ) : (
+                '（暂无内容）'
+              )
+            ) : (
+              m.content
+            )}
           </div>
           {!!m.sources?.length && (
             <div className="mt-2 space-y-1 text-xs text-fd-muted-foreground">
