@@ -1,8 +1,8 @@
 {
   "title": "快速上手",
   "pages": [
-    "writing-guide",
-    "index"
+    "index",
+    "writing-guide"
   ],
   "icon": "Rocket"
 }
