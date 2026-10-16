@@ -14,5 +14,6 @@ export function baseOptions(): BaseLayoutProps {
       // JSX supported
       title: appName,
     },
+    links: [{ text: '问知识库', url: '/ask' }],
   };
 }

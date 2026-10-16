@@ -1,0 +1,31 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../lib/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Doc {
+  id        String   @id
+  path      String   @unique
+  title     String
+  url       String
+  hash      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  chunks    Chunk[]
+}
+
+model Chunk {
+  id        String                       @id
+  docId     String
+  ord       Int
+  heading   String                       @default("")
+  content   String
+  embedding Unsupported("vector(4096)")
+  doc       Doc                          @relation(fields: [docId], references: [id], onDelete: Cascade)
+
+  @@index([docId])
+}

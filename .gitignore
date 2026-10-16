@@ -36,3 +36,6 @@ content/docs/(dev)
 # 后台运行期数据（仅影响本地 dev；生产 content 卷自身是 git 仓库）
 /content/drafts/
 /content/media/
+
+# Prisma 生成的 client
+/lib/generated/

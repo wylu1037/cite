@@ -21,6 +21,7 @@ function pageUrl(p: string) {
 export function DocList({ docs }: { docs: DocEntry[] }) {
   const router = useRouter();
   const [busy, setBusy] = useState('');
+  const [msg, setMsg] = useState('');
 
   async function remove(p: string) {
     if (!confirm(`确认删除 ${p}？（历史保留在 git，可回滚恢复）`)) return;
@@ -40,6 +41,32 @@ export function DocList({ docs }: { docs: DocEntry[] }) {
     router.refresh();
   }
 
+  async function reindex() {
+    setBusy('__reindex__');
+    setMsg('');
+    try {
+      const res = await fetch('/api/admin/reindex', { method: 'POST' });
+      const json = (await res.json()) as {
+        ok?: boolean;
+        error?: string;
+        stats?: { docs: number; updated: number; skipped: number; deleted: number; chunks: number; errors?: string[] };
+      };
+      if (json.ok && json.stats) {
+        const s = json.stats;
+        setMsg(
+          `索引完成：文档 ${s.docs}（更新 ${s.updated} / 跳过 ${s.skipped} / 清理 ${s.deleted}），分块 ${s.chunks}` +
+            (s.errors?.length ? `，失败 ${s.errors.length}：${s.errors[0]}` : ''),
+        );
+      } else {
+        setMsg(`索引失败：${json.error ?? '未知错误'}`);
+      }
+    } catch {
+      setMsg('索引失败：网络错误');
+    } finally {
+      setBusy('');
+    }
+  }
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
@@ -54,11 +81,19 @@ export function DocList({ docs }: { docs: DocEntry[] }) {
           <Link href="/admin/meta" className="rounded-lg border px-3 py-1.5 text-sm">
             侧栏配置
           </Link>
+          <button
+            onClick={reindex}
+            disabled={busy === '__reindex__'}
+            className="rounded-lg border px-3 py-1.5 text-sm disabled:opacity-50"
+          >
+            {busy === '__reindex__' ? '重建中…' : '重建索引'}
+          </button>
           <button onClick={logout} className="rounded-lg border px-3 py-1.5 text-sm">
             退出登录
           </button>
         </div>
       </div>
+      {msg && <p className="text-sm text-fd-muted-foreground">{msg}</p>}
       <table className="w-full text-sm">
         <thead>
           <tr className="border-b text-left text-fd-muted-foreground">
