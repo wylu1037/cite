@@ -23,7 +23,7 @@ if (eUrl) {
     const j = await res.json().catch(() => ({}));
     const v = j?.data?.[0]?.embedding ?? [];
     let verdict = '';
-    if (dim) verdict = v.length === dim ? `（EMBEDDING_DIM=${dim} ✓）` : `（EMBEDDING_DIM=${dim} ✗ 不一致：改 .env 的 EMBEDDING_DIM，并同步 prisma/migrations 的 vector(${v.length}) 后重新迁移）`;
+    if (dim) verdict = v.length === dim ? `（EMBEDDING_DIM=${dim} ✓）` : `（EMBEDDING_DIM=${dim} ✗ 不一致：改 .env 的 EMBEDDING_DIM，并同步迁移 SQL 里的 vector(${v.length})；首次部署库为空时 down -v 清库重来即可）`;
     console.log(`[check-ai] embedding HTTP ${res.status} 维度=${v.length}${verdict}`);
   } catch (e) {
     console.log('[check-ai] embedding 失败：', e instanceof Error ? e.message : e);

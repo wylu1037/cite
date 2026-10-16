@@ -55,7 +55,8 @@ docker compose exec web node scripts/check-ai.mjs   # 核对 embedding 实际维
 4. `/admin` 新建一篇草稿 → 发布 → 站点即时可见 → 回滚验证
 
 > 若 `check-ai` 报 `EMBEDDING_DIM` 不一致：改 `.env` 的 `EMBEDDING_DIM`，并同步
-> `prisma/schema.prisma` 与 `prisma/migrations/` 里 `vector(N)` 的 N，再重新 `docker compose up -d --build` 与重建索引。
+> `prisma/schema.prisma` 与 `prisma/migrations/*/migration.sql` 里 `vector(N)` 的 N。
+> 首次部署（库为空）最快路径：`docker compose down -v` 清掉数据库卷，重新 `up -d --build` 后重建索引。
 
 ## AI 配置
 
