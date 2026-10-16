@@ -44,3 +44,8 @@ Format:
 - Use imperative, present tense: "add" not "added", "fix" not "fixed".
 - Do not capitalize the first letter of the subject.
 - No trailing period (`.`) at the end of the subject.
+
+### 3. Commit Execution Policy
+- The assistant is **STRICTLY FORBIDDEN** from running `git commit` automatically without explicit user instruction.
+- The assistant must only provide/recommend the Git Conventional Commit message and wait for user confirmation or manual execution.
+
