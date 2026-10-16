@@ -3,7 +3,8 @@ import { notFound } from 'next/navigation';
 import { generateOGImage } from 'fumadocs-ui/og';
 import { appName, getPageImageUrl } from '@/lib/shared';
 
-export const revalidate = false;
+// 内容以卷为准（免重建发布）：禁用构建期缓存
+export const dynamic = 'force-dynamic';
 
 export async function GET(_req: Request, { params }: RouteContext<'/og/docs/[...slug]'>) {
   const { slug } = await params;
@@ -18,10 +19,3 @@ export async function GET(_req: Request, { params }: RouteContext<'/og/docs/[...
   });
 }
 
-export async function generateStaticParams() {
-  const docs = await getSource();
-  return docs.getPages().map((page) => ({
-    lang: page.locale,
-    slug: getPageImageUrl(page).segments,
-  }));
-}

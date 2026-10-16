@@ -1,3 +1,6 @@
+// 内容以卷为准（免重建发布）：禁用构建期静态化
+export const dynamic = 'force-dynamic';
+
 import { getSource } from '@/lib/source';
 import {
   DocsBody,
@@ -62,10 +65,6 @@ export default async function Page(props: PageProps<'/docs/[[...slug]]'>) {
   );
 }
 
-export async function generateStaticParams() {
-  const docs = await getSource();
-  return docs.generateParams();
-}
 
 export async function generateMetadata(props: PageProps<'/docs/[[...slug]]'>): Promise<Metadata> {
   const docs = await getSource();

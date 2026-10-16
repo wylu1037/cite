@@ -2,7 +2,8 @@ import { docsLlms, getSource } from '@/lib/source';
 import { getPageMarkdownUrl } from '@/lib/shared';
 import { notFound } from 'next/navigation';
 
-export const revalidate = false;
+// 内容以卷为准（免重建发布）：禁用构建期缓存
+export const dynamic = 'force-dynamic';
 
 export async function GET(_req: Request, { params }: RouteContext<'/llms.mdx/docs/[[...slug]]'>) {
   const { slug } = await params;
@@ -17,10 +18,3 @@ export async function GET(_req: Request, { params }: RouteContext<'/llms.mdx/doc
   });
 }
 
-export async function generateStaticParams() {
-  const docs = await getSource();
-  return docs.getPages().map((page) => ({
-    lang: page.locale,
-    slug: getPageMarkdownUrl(page).segments,
-  }));
-}
