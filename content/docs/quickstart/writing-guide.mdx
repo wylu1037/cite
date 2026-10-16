@@ -1,0 +1,55 @@
+---
+title: 文档写作速览
+description: Markdown 常用语法与约定
+---
+
+import { Callout } from 'fumadocs-ui/components/callout';
+
+# 文档写作速览
+
+## 文件与标题
+
+- 每个文档以 frontmatter 开头：`title` 必填，`description` 建议填写（会出现在搜索结果里）
+- 一级标题用 `#`，之后按层级使用 `##` / `###`，不要跳级
+
+## 常用语法
+
+**加粗**、*斜体*、`行内代码`、[链接](https://example.com)，以及列表与任务清单：
+
+- [x] 已完成的项
+- [ ] 待办的项
+
+表格：
+
+| 字段 | 说明 |
+| --- | --- |
+| id | 唯一标识 |
+| name | 展示名称 |
+
+## 代码块
+
+```ts
+export function hello(name: string) {
+  return `hello ${name}`;
+}
+```
+
+## 图片
+
+在编辑器工具栏点「上传图片」，会自动插入图片 Markdown；图片文件存放在内容目录的 `media/` 下。
+
+## 提示框（MDX 组件）
+
+文档是 MDX，可以直接使用组件，例如：
+
+```mdx
+import { Callout } from 'fumadocs-ui/components/callout';
+
+<Callout type="warn">需要特别注意的说明。</Callout>
+```
+
+真实效果如下：
+
+<Callout type="info">
+这是一个实际渲染的提示框，写文档时可直接使用。
+</Callout>
