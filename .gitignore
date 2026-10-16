@@ -32,3 +32,7 @@ content/docs/(dev)
 
 # env 文件
 /.env
+
+# 后台运行期数据（仅影响本地 dev；生产 content 卷自身是 git 仓库）
+/content/drafts/
+/content/media/
