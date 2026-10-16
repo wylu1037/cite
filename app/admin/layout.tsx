@@ -3,7 +3,7 @@ import { BookOpen, Sparkles, FolderTree, Plus, FileText } from 'lucide-react';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="min-h-screen bg-[#010102] text-[#f7f8f8] selection:bg-[#5e6ad2] selection:text-white">
+    <div className="dark min-h-screen bg-[#010102] text-[#f7f8f8] selection:bg-[#5e6ad2] selection:text-white">
       {/* Top sticky Linear navigation bar */}
       <header className="sticky top-0 z-40 flex h-14 w-full items-center justify-between border-b border-[#23252a] bg-[#010102]/85 px-6 backdrop-blur">
         <div className="flex items-center gap-6">

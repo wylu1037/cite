@@ -2,8 +2,6 @@
 
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent } from '@/components/ui/card';
 import { Kbd } from '@/components/ui/kbd';
 import {
   Sparkles,
@@ -12,11 +10,10 @@ import {
   ExternalLink,
   Copy,
   Check,
-  Bot,
-  User,
-  ArrowRight,
   BookOpen,
-  StopCircle,
+  ArrowRight,
+  HelpCircle,
+  Lightbulb,
 } from 'lucide-react';
 
 type Source = { title: string; url: string; heading: string; content: string };
@@ -26,7 +23,8 @@ type StreamEvent = { type?: string; text?: string; sources?: Source[]; message?:
 const PROMPT_SUGGESTIONS = [
   '后台怎么新建并发布一篇文档？',
   '本地开发如何一键启动知识库站点？',
-  '内网 Docker Compose 部署与 pgvector 迁移步骤是什么？',
+  'Docker Compose 部署与 pgvector 迁移步骤？',
+  '知识库的侧栏目录与图标怎么配置？',
 ];
 
 /** 代码块组件（带复制功能） */
@@ -40,18 +38,18 @@ function CodeBlock({ code }: { code: string }) {
   }
 
   return (
-    <div className="relative my-3 rounded-[8px] border border-[#23252a] bg-[#010102] overflow-hidden group">
-      <div className="flex items-center justify-between border-b border-[#23252a] bg-[#141516]/60 px-3 py-1.5 text-[11px] text-[#8a8f98]">
+    <div className="relative my-3 rounded-[8px] border border-zinc-200 dark:border-[#23252a] bg-zinc-950 text-zinc-100 overflow-hidden shadow-xs">
+      <div className="flex items-center justify-between border-b border-zinc-800 bg-zinc-900/80 px-3 py-1.5 text-[11px] text-zinc-400">
         <span className="font-mono">代码片段</span>
         <button
           onClick={copy}
-          className="flex items-center gap-1 hover:text-[#f7f8f8] transition-colors"
+          className="flex items-center gap-1 hover:text-white transition-colors"
           title="复制代码"
         >
           {copied ? (
             <>
-              <Check className="h-3 w-3 text-[#4ade80]" />
-              <span className="text-[#4ade80]">已复制</span>
+              <Check className="h-3 w-3 text-emerald-400" />
+              <span className="text-emerald-400">已复制</span>
             </>
           ) : (
             <>
@@ -61,7 +59,7 @@ function CodeBlock({ code }: { code: string }) {
           )}
         </button>
       </div>
-      <pre className="overflow-x-auto p-3.5 font-mono text-xs text-[#f7f8f8] leading-relaxed">
+      <pre className="overflow-x-auto p-3.5 font-mono text-xs leading-relaxed">
         <code>{code}</code>
       </pre>
     </div>
@@ -72,7 +70,7 @@ function CodeBlock({ code }: { code: string }) {
 function AnswerText({ text, sources }: { text: string; sources?: Source[] }) {
   const fence = text.split('```');
   return (
-    <div className="space-y-2 text-xs leading-relaxed text-[#f7f8f8]">
+    <div className="space-y-2 text-xs sm:text-sm leading-relaxed text-zinc-800 dark:text-[#f7f8f8]">
       {fence.map((part, i) =>
         i % 2 === 1 ? (
           <CodeBlock key={i} code={part.replace(/^[a-zA-Z]*\n/, '').trimEnd()} />
@@ -95,7 +93,7 @@ function inline(text: string, sources?: Source[]): ReactNode[] {
     if (m.index > last) out.push(text.slice(last, m.index));
     if (m[1] !== undefined) {
       out.push(
-        <strong key={out.length} className="font-semibold text-white">
+        <strong key={out.length} className="font-semibold text-zinc-900 dark:text-white">
           {m[1]}
         </strong>,
       );
@@ -103,7 +101,7 @@ function inline(text: string, sources?: Source[]): ReactNode[] {
       out.push(
         <code
           key={out.length}
-          className="rounded-[4px] border border-[#23252a] bg-[#141516] px-1.5 py-0.5 font-mono text-[11px] text-[#828fff]"
+          className="rounded-[4px] border border-zinc-200 dark:border-[#23252a] bg-zinc-100 dark:bg-[#141516] px-1.5 py-0.5 font-mono text-[11px] text-[#5e6ad2] dark:text-[#828fff]"
         >
           {m[2]}
         </code>,
@@ -119,7 +117,7 @@ function inline(text: string, sources?: Source[]): ReactNode[] {
             title={`${s.title}${s.heading ? ` · ${s.heading}` : ''}`}
             target="_blank"
             rel="noreferrer"
-            className="inline-flex items-center gap-0.5 mx-0.5 rounded-full border border-[#5e6ad2]/30 bg-[#5e6ad2]/15 px-1.5 py-0.2 text-[10px] font-mono text-[#828fff] hover:bg-[#5e6ad2]/30 hover:underline transition-colors"
+            className="inline-flex items-center gap-0.5 mx-0.5 rounded-full border border-[#5e6ad2]/20 dark:border-[#5e6ad2]/30 bg-[#5e6ad2]/10 dark:bg-[#5e6ad2]/15 px-1.5 py-0.2 text-[10px] font-mono text-[#5e6ad2] dark:text-[#828fff] hover:bg-[#5e6ad2]/20 dark:hover:bg-[#5e6ad2]/30 transition-colors"
           >
             [{n}]
           </a>,
@@ -209,173 +207,235 @@ export function AskClient() {
   function clearHistory() {
     setMessages([]);
     setInput('');
+    setTimeout(() => taRef.current?.focus(), 50);
   }
 
   return (
-    <div className="flex-1 flex flex-col justify-between space-y-6">
-      {/* Suggestions when conversation is empty */}
-      {messages.length === 0 && (
-        <div className="my-auto py-8 space-y-4">
-          <p className="text-center text-xs text-[#8a8f98]">
-            您可以使用自然语言直接提问，或者尝试以下常见问题：
-          </p>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            {PROMPT_SUGGESTIONS.map((s, idx) => (
-              <button
-                key={idx}
-                onClick={() => void send(s)}
-                className="group flex flex-col justify-between rounded-[10px] border border-[#23252a] bg-[#0f1011] p-4 text-left transition-all hover:border-[#5e6ad2]/50 hover:bg-[#141516] shadow-[0_2px_8px_rgba(0,0,0,0.4)]"
-              >
-                <span className="text-xs text-[#d0d6e0] group-hover:text-[#f7f8f8] leading-relaxed">
-                  {s}
-                </span>
-                <span className="mt-3 flex items-center text-[10px] text-[#5e6ad2] font-medium opacity-0 group-hover:opacity-100 transition-opacity">
-                  立即提问 <ArrowRight className="h-3 w-3 ml-1" />
-                </span>
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Messages Feed */}
-      {messages.length > 0 && (
-        <div className="space-y-4 pb-2">
-          {messages.map((m, i) => (
-            <div
-              key={i}
-              className={`flex flex-col ${
-                m.role === 'user' ? 'items-end' : 'items-start'
-              }`}
-            >
-              {/* Role Header */}
-              <div className="flex items-center gap-1.5 mb-1 text-[11px] text-[#8a8f98]">
-                {m.role === 'user' ? (
-                  <>
-                    <span>您</span>
-                    <User className="h-3 w-3 text-[#d0d6e0]" />
-                  </>
-                ) : (
-                  <>
-                    <Sparkles className="h-3 w-3 text-[#828fff]" />
-                    <span className="text-[#828fff] font-medium">知识库助手</span>
-                  </>
-                )}
-              </div>
-
-              {/* Message Bubble */}
-              <div
-                className={`w-full max-w-3xl rounded-[12px] p-4 text-xs transition-all ${
-                  m.role === 'user'
-                    ? 'border border-[#23252a] bg-[#141516] text-[#f7f8f8] max-w-xl'
-                    : 'border border-[#23252a] bg-[#0f1011] shadow-[0_4px_24px_rgba(0,0,0,0.5)]'
-                }`}
-              >
-                {m.role === 'assistant' ? (
-                  m.content ? (
-                    <AnswerText text={m.content} sources={m.sources} />
-                  ) : busy && i === messages.length - 1 ? (
-                    <div className="flex items-center gap-2 text-xs text-[#8a8f98] py-2">
-                      <div className="h-2 w-2 rounded-full bg-[#5e6ad2] animate-ping" />
-                      <span>正在检索文档分块并构思回答…</span>
-                    </div>
-                  ) : (
-                    <span className="text-[#8a8f98]">（暂无内容）</span>
-                  )
-                ) : (
-                  <p className="whitespace-pre-wrap leading-relaxed">{m.content}</p>
-                )}
-              </div>
-
-              {/* Source References */}
-              {m.role === 'assistant' && !!m.sources?.length && (
-                <div className="mt-2 w-full max-w-3xl rounded-[8px] border border-[#23252a]/80 bg-[#141516]/60 p-3 text-[11px]">
-                  <div className="flex items-center gap-1.5 font-medium text-[#8a8f98] mb-2">
-                    <BookOpen className="h-3.5 w-3.5 text-[#5e6ad2]" />
-                    <span>引用来源（点击直达对应页面）：</span>
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    {m.sources.map((s, j) => (
-                      <a
-                        key={j}
-                        href={s.url}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="flex items-center gap-1 rounded-[4px] border border-[#23252a] bg-[#0f1011] px-2 py-1 text-[#d0d6e0] hover:border-[#5e6ad2] hover:text-[#f7f8f8] transition-colors"
-                      >
-                        <span className="text-[#828fff] font-mono">[{j + 1}]</span>
-                        <span>{s.title}</span>
-                        {s.heading && <span className="text-[#62666d]">· {s.heading}</span>}
-                        <ExternalLink className="h-2.5 w-2.5 ml-0.5 text-[#62666d]" />
-                      </a>
-                    ))}
-                  </div>
-                </div>
-              )}
+    <div className="flex-1 flex flex-col justify-between">
+      {/* Empty State: Centered Hero & Input */}
+      {messages.length === 0 ? (
+        <div className="my-auto py-6 sm:py-12 flex flex-col items-center text-center space-y-6">
+          {/* Header */}
+          <div className="space-y-3 max-w-xl">
+            <div className="inline-flex items-center gap-1.5 rounded-full border border-[#5e6ad2]/25 bg-[#5e6ad2]/10 px-3 py-1 text-xs font-medium text-[#5e6ad2] dark:text-[#828fff]">
+              <Sparkles className="h-3.5 w-3.5" />
+              <span>Ask AI · 部门知识库智能问答</span>
             </div>
-          ))}
-          <div ref={endRef} />
-        </div>
-      )}
+            <h1 className="text-2xl sm:text-4xl font-bold tracking-tight text-zinc-900 dark:text-[#f7f8f8]">
+              有什么可以帮您查阅？
+            </h1>
+            <p className="text-xs sm:text-sm text-zinc-500 dark:text-[#8a8f98] leading-relaxed">
+              基于站内已发布文档进行精准语义检索与大模型推理，所有回答均包含文档来源直达锚点。
+            </p>
+          </div>
 
-      {/* Floating Linear Input Panel */}
-      <div className="sticky bottom-4 z-20 w-full pt-2">
-        <div className="rounded-[12px] border border-[#23252a] bg-[#0f1011]/95 backdrop-blur p-3 shadow-[0_8px_32px_rgba(0,0,0,0.8)] focus-within:border-[#5e6ad2]/70 focus-within:ring-2 focus-within:ring-[#5e6ad2]/20 transition-all">
-          <textarea
-            ref={taRef}
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                void send();
-              }
-            }}
-            rows={2}
-            placeholder="向知识库提问任何技术问题、流程规范或产品功能…"
-            className="w-full resize-none bg-transparent text-xs text-[#f7f8f8] placeholder:text-[#62666d] focus:outline-none"
-          />
-
-          <div className="mt-2 flex items-center justify-between border-t border-[#23252a]/60 pt-2 text-[11px] text-[#62666d]">
-            <div className="flex items-center gap-2">
-              <span className="hidden sm:inline">
+          {/* Central Search/Input Box */}
+          <div className="w-full max-w-2xl text-left rounded-2xl border border-zinc-200 dark:border-[#23252a] bg-white dark:bg-[#0f1011] p-3.5 shadow-xl shadow-zinc-200/50 dark:shadow-[0_12px_40px_rgba(0,0,0,0.8)] focus-within:border-[#5e6ad2] focus-within:ring-2 focus-within:ring-[#5e6ad2]/20 transition-all">
+            <textarea
+              ref={taRef}
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                  e.preventDefault();
+                  void send();
+                }
+              }}
+              rows={3}
+              placeholder="向知识库提问任何技术规范、部署指引或系统使用方法…"
+              className="w-full resize-none bg-transparent text-sm text-zinc-900 dark:text-[#f7f8f8] placeholder:text-zinc-400 dark:placeholder:text-[#62666d] focus:outline-none leading-relaxed"
+            />
+            <div className="flex items-center justify-between border-t border-zinc-100 dark:border-[#23252a]/60 pt-2.5 mt-2">
+              <span className="text-[11px] text-zinc-400 dark:text-[#62666d] flex items-center gap-1.5">
                 按 <Kbd>Enter</Kbd> 发送，<Kbd>Shift + Enter</Kbd> 换行
               </span>
-              {messages.length > 0 && (
-                <button
-                  type="button"
-                  onClick={clearHistory}
-                  disabled={busy}
-                  className="flex items-center gap-1 text-[#8a8f98] hover:text-[#f7f8f8] transition-colors ml-1"
-                >
-                  <RotateCcw className="h-3 w-3" />
-                  新对话
-                </button>
-              )}
+              <Button
+                variant="primary"
+                size="sm"
+                onClick={() => void send()}
+                disabled={busy || !input.trim()}
+                className="h-8 px-4 text-xs font-medium"
+              >
+                <Send className="h-3.5 w-3.5 mr-1" />
+                提问
+              </Button>
             </div>
+          </div>
 
-            <Button
-              variant="primary"
-              size="sm"
-              onClick={() => void send()}
-              disabled={busy || !input.trim()}
-              className="h-7 text-xs px-3"
-            >
-              {busy ? (
-                <>
-                  <div className="h-3 w-3 border-2 border-white border-t-transparent rounded-full animate-spin mr-1" />
-                  生成中…
-                </>
-              ) : (
-                <>
-                  <Send className="h-3 w-3" />
-                  发送
-                </>
-              )}
-            </Button>
+          {/* Prompt Suggestions */}
+          <div className="w-full max-w-2xl space-y-2.5 text-left pt-2">
+            <div className="flex items-center gap-1.5 text-[11px] font-medium text-zinc-400 dark:text-[#62666d]">
+              <Lightbulb className="h-3.5 w-3.5 text-[#5e6ad2]" />
+              <span>常见问题快捷探索：</span>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {PROMPT_SUGGESTIONS.map((s, idx) => (
+                <button
+                  key={idx}
+                  type="button"
+                  onClick={() => void send(s)}
+                  className="flex items-center gap-1.5 rounded-full border border-zinc-200 dark:border-[#23252a] bg-white dark:bg-[#0f1011] px-3.5 py-1.5 text-xs text-zinc-700 dark:text-[#d0d6e0] hover:border-[#5e6ad2] hover:text-[#5e6ad2] dark:hover:border-[#5e6ad2] dark:hover:text-[#828fff] transition-all shadow-xs hover:shadow-sm"
+                >
+                  <span className="text-zinc-400 dark:text-[#62666d]">✦</span>
+                  <span>{s}</span>
+                </button>
+              ))}
+            </div>
           </div>
         </div>
-      </div>
+      ) : (
+        /* Conversation Mode */
+        <div className="space-y-6 flex-1 flex flex-col">
+          {/* Conversation Top Bar */}
+          <div className="flex items-center justify-between border-b border-zinc-200 dark:border-[#23252a] pb-3">
+            <div className="flex items-center gap-2">
+              <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[#5e6ad2]/15 text-[#5e6ad2] dark:text-[#828fff]">
+                <Sparkles className="h-3 w-3" />
+              </span>
+              <span className="text-xs font-semibold text-zinc-900 dark:text-[#f7f8f8]">
+                Ask AI 对话中
+              </span>
+              <span className="text-[11px] text-zinc-400 dark:text-[#62666d]">
+                （共 {messages.length} 条消息）
+              </span>
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={clearHistory}
+              disabled={busy}
+              className="h-7 text-xs"
+            >
+              <RotateCcw className="h-3 w-3 mr-1" />
+              开启新对话
+            </Button>
+          </div>
+
+          {/* Messages Stream */}
+          <div className="space-y-6 flex-1">
+            {messages.map((m, i) => (
+              <div
+                key={i}
+                className={`flex flex-col ${
+                  m.role === 'user' ? 'items-end' : 'items-start'
+                }`}
+              >
+                {/* User Message */}
+                {m.role === 'user' ? (
+                  <div className="rounded-2xl rounded-tr-sm bg-zinc-900 dark:bg-[#141516] text-white dark:text-[#f7f8f8] border border-zinc-800 dark:border-[#23252a] px-4 py-2.5 text-xs sm:text-sm max-w-xl shadow-xs">
+                    <p className="whitespace-pre-wrap leading-relaxed">{m.content}</p>
+                  </div>
+                ) : (
+                  /* Assistant Message */
+                  <div className="w-full flex flex-col items-start space-y-2">
+                    <div className="flex items-center gap-1.5 text-xs font-medium text-[#5e6ad2] dark:text-[#828fff]">
+                      <Sparkles className="h-3.5 w-3.5" />
+                      <span>知识库助手</span>
+                    </div>
+
+                    <div className="w-full rounded-2xl border border-zinc-200 dark:border-[#23252a] bg-white dark:bg-[#0f1011] p-4 sm:p-5 shadow-xs dark:shadow-[0_4px_24px_rgba(0,0,0,0.5)]">
+                      {m.content ? (
+                        <AnswerText text={m.content} sources={m.sources} />
+                      ) : busy && i === messages.length - 1 ? (
+                        <div className="flex items-center gap-2 text-xs text-zinc-400 dark:text-[#8a8f98] py-2">
+                          <div className="h-2 w-2 rounded-full bg-[#5e6ad2] animate-ping" />
+                          <span>正在检索知识库文档并组织回答…</span>
+                        </div>
+                      ) : (
+                        <span className="text-xs text-zinc-400 dark:text-[#8a8f98]">
+                          （暂无内容）
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Sources References Grid */}
+                    {!!m.sources?.length && (
+                      <div className="w-full rounded-xl border border-zinc-200 dark:border-[#23252a] bg-zinc-50 dark:bg-[#141516]/60 p-3 text-xs mt-1">
+                        <div className="flex items-center gap-1.5 font-medium text-zinc-600 dark:text-[#8a8f98] mb-2.5">
+                          <BookOpen className="h-3.5 w-3.5 text-[#5e6ad2]" />
+                          <span>引用来源文档（点击直达对应章节）：</span>
+                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                          {m.sources.map((s, j) => (
+                            <a
+                              key={j}
+                              href={s.url}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="flex items-center justify-between rounded-[8px] border border-zinc-200 dark:border-[#23252a] bg-white dark:bg-[#0f1011] p-2.5 text-zinc-700 dark:text-[#d0d6e0] hover:border-[#5e6ad2] hover:text-[#5e6ad2] dark:hover:text-[#828fff] transition-colors group shadow-2xs"
+                            >
+                              <div className="flex items-center gap-1.5 truncate">
+                                <span className="font-mono text-[#5e6ad2] dark:text-[#828fff] font-semibold shrink-0">
+                                  [{j + 1}]
+                                </span>
+                                <span className="truncate font-medium">{s.title}</span>
+                                {s.heading && (
+                                  <span className="text-zinc-400 dark:text-[#62666d] truncate text-[11px]">
+                                    · {s.heading}
+                                  </span>
+                                )}
+                              </div>
+                              <ExternalLink className="h-3 w-3 text-zinc-400 dark:text-[#62666d] group-hover:text-[#5e6ad2] shrink-0 ml-1.5" />
+                            </a>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            ))}
+            <div ref={endRef} />
+          </div>
+
+          {/* Sticky Bottom Input Bar in Conversation Mode */}
+          <div className="sticky bottom-4 z-20 w-full pt-2">
+            <div className="rounded-2xl border border-zinc-200 dark:border-[#23252a] bg-white/95 dark:bg-[#0f1011]/95 backdrop-blur p-3 shadow-lg shadow-zinc-200/50 dark:shadow-[0_8px_32px_rgba(0,0,0,0.8)] focus-within:border-[#5e6ad2] focus-within:ring-2 focus-within:ring-[#5e6ad2]/20 transition-all">
+              <textarea
+                ref={taRef}
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    void send();
+                  }
+                }}
+                rows={2}
+                placeholder="继续追问或输入新问题…"
+                className="w-full resize-none bg-transparent text-sm text-zinc-900 dark:text-[#f7f8f8] placeholder:text-zinc-400 dark:placeholder:text-[#62666d] focus:outline-none"
+              />
+
+              <div className="mt-1.5 flex items-center justify-between border-t border-zinc-100 dark:border-[#23252a]/60 pt-2 text-[11px] text-zinc-400 dark:text-[#62666d]">
+                <span className="hidden sm:inline">
+                  按 <Kbd>Enter</Kbd> 发送，<Kbd>Shift + Enter</Kbd> 换行
+                </span>
+                <div className="flex items-center gap-2 ml-auto">
+                  <Button
+                    variant="primary"
+                    size="sm"
+                    onClick={() => void send()}
+                    disabled={busy || !input.trim()}
+                    className="h-7 text-xs px-3"
+                  >
+                    {busy ? (
+                      <>
+                        <div className="h-3 w-3 border-2 border-white border-t-transparent rounded-full animate-spin mr-1" />
+                        回答中…
+                      </>
+                    ) : (
+                      <>
+                        <Send className="h-3 w-3 mr-1" />
+                        发送
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

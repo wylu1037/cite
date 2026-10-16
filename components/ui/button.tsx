@@ -8,15 +8,15 @@ export const buttonVariants = cva(
     variants: {
       variant: {
         primary:
-          'bg-[#5e6ad2] text-white hover:bg-[#828fff] active:bg-[#5e69d1] shadow-[0_1px_2px_rgba(0,0,0,0.6)]',
+          'bg-[#5e6ad2] text-white hover:bg-[#828fff] active:bg-[#5e69d1] shadow-[0_1px_2px_rgba(0,0,0,0.2)] dark:shadow-[0_1px_2px_rgba(0,0,0,0.6)]',
         secondary:
-          'bg-[#0f1011] text-[#f7f8f8] border border-[#23252a] hover:bg-[#141516] hover:border-[#34343a] active:bg-[#18191a]',
+          'bg-zinc-100 dark:bg-[#0f1011] text-zinc-900 dark:text-[#f7f8f8] border border-zinc-200 dark:border-[#23252a] hover:bg-zinc-200 dark:hover:bg-[#141516] hover:border-zinc-300 dark:hover:border-[#34343a] active:bg-zinc-300 dark:active:bg-[#18191a]',
         outline:
-          'border border-[#23252a] text-[#d0d6e0] hover:bg-[#141516] hover:text-[#f7f8f8] active:bg-[#18191a]',
+          'border border-zinc-200 dark:border-[#23252a] text-zinc-700 dark:text-[#d0d6e0] hover:bg-zinc-100 dark:hover:bg-[#141516] hover:text-zinc-900 dark:hover:text-[#f7f8f8] active:bg-zinc-200 dark:active:bg-[#18191a]',
         ghost:
-          'text-[#8a8f98] hover:text-[#f7f8f8] hover:bg-[#141516] active:bg-[#18191a]',
+          'text-zinc-600 dark:text-[#8a8f98] hover:text-zinc-900 dark:hover:text-[#f7f8f8] hover:bg-zinc-100 dark:hover:bg-[#141516] active:bg-zinc-200 dark:active:bg-[#18191a]',
         destructive:
-          'bg-[#e5484d]/15 text-[#ff6b6b] border border-[#e5484d]/30 hover:bg-[#e5484d]/25 active:bg-[#e5484d]/35',
+          'bg-red-500/10 dark:bg-[#e5484d]/15 text-red-600 dark:text-[#ff6b6b] border border-red-200 dark:border-[#e5484d]/30 hover:bg-red-500/20 dark:hover:bg-[#e5484d]/25 active:bg-red-500/30 dark:active:bg-[#e5484d]/35',
       },
       size: {
         default: 'h-9 px-3.5 text-sm rounded-[8px] gap-2',
