@@ -2,6 +2,11 @@
 
 import { useState, type FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { ArrowLeft, FilePlus, Sparkles } from 'lucide-react';
 
 export function NewDocForm() {
   const router = useRouter();
@@ -35,37 +40,77 @@ export function NewDocForm() {
   }
 
   return (
-    <form onSubmit={submit} className="space-y-4 rounded-xl border p-6">
-      <label className="block space-y-1">
-        <span className="text-sm">文件路径（用 / 分板块，如 getting-started/install.mdx）</span>
-        <input
-          className="w-full rounded-lg border bg-transparent px-3 py-2 font-mono text-sm"
-          value={slug}
-          onChange={(e) => setSlug(e.target.value)}
-          placeholder="getting-started/install.mdx"
-          required
-        />
-      </label>
-      <label className="block space-y-1">
-        <span className="text-sm">标题</span>
-        <input
-          className="w-full rounded-lg border bg-transparent px-3 py-2"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          placeholder="安装指南"
-        />
-      </label>
-      {error && <p className="text-sm text-red-500">{error}</p>}
-      <p className="text-xs text-fd-muted-foreground">
-        创建后进入编辑页；先「保存草稿」再「发布」，发布后站点即时可见。
-      </p>
-      <button
-        type="submit"
-        disabled={busy}
-        className="rounded-lg bg-fd-primary px-4 py-2 text-sm font-medium text-fd-primary-foreground disabled:opacity-60"
-      >
-        {busy ? '创建中…' : '创建并编辑'}
-      </button>
-    </form>
+    <Card className="border-[#23252a] bg-[#0f1011] shadow-[0_8px_32px_rgba(0,0,0,0.6)]">
+      <CardHeader className="pb-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <div className="flex h-8 w-8 items-center justify-center rounded-[6px] bg-[#5e6ad2]/15 text-[#828fff] border border-[#5e6ad2]/30">
+              <FilePlus className="h-4 w-4" />
+            </div>
+            <div>
+              <CardTitle className="text-base text-[#f7f8f8]">新建文档</CardTitle>
+              <CardDescription className="text-xs text-[#8a8f98]">
+                在指定板块创建新的 Markdown / MDX 知识库文档
+              </CardDescription>
+            </div>
+          </div>
+          <Link href="/admin">
+            <Button variant="ghost" size="sm" className="h-7 text-xs">
+              <ArrowLeft className="h-3 w-3 mr-1" />
+              返回列表
+            </Button>
+          </Link>
+        </div>
+      </CardHeader>
+      <CardContent>
+        <form onSubmit={submit} className="space-y-4">
+          <div className="space-y-1.5">
+            <label className="text-xs font-medium text-[#d0d6e0]">
+              文件相对路径（使用 <code className="text-[#5e6ad2] font-mono">/</code> 区分目录板块）
+            </label>
+            <Input
+              value={slug}
+              onChange={(e) => setSlug(e.target.value)}
+              placeholder="quickstart/install.mdx"
+              className="font-mono text-xs"
+              required
+            />
+            <p className="text-[11px] text-[#62666d]">
+              示例：<span className="text-[#8a8f98]">develop/api-reference.mdx</span> 或 <span className="text-[#8a8f98]">ops/docker-guide.mdx</span>
+            </p>
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="text-xs font-medium text-[#d0d6e0]">文档标题</label>
+            <Input
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="例如：安装与配置指南"
+            />
+          </div>
+
+          {error && (
+            <div className="p-2.5 rounded-[6px] bg-[#e5484d]/10 border border-[#e5484d]/25 text-xs text-[#ff6b6b]">
+              {error}
+            </div>
+          )}
+
+          <div className="rounded-[8px] border border-[#23252a] bg-[#141516] p-3 text-xs text-[#8a8f98]">
+            <p>💡 提示：创建后将立即进入在线编辑器。首次保存为「草稿」，点击「发布」后站点即时可见，无需重新构建镜像。</p>
+          </div>
+
+          <div className="flex justify-end gap-2 pt-2">
+            <Link href="/admin">
+              <Button type="button" variant="secondary" size="sm">
+                取消
+              </Button>
+            </Link>
+            <Button type="submit" variant="primary" size="sm" disabled={busy}>
+              {busy ? '创建中…' : '创建并开始编辑'}
+            </Button>
+          </div>
+        </form>
+      </CardContent>
+    </Card>
   );
 }

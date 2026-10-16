@@ -7,7 +7,7 @@ export default async function EditPage(props: PageProps<'/admin/edit/[...path]'>
   const rel = segments.join('/');
 
   return (
-    <main className="mx-auto w-full max-w-4xl flex-1 p-6">
+    <main className="mx-auto w-full max-w-6xl flex-1 p-6 lg:p-8">
       <Editor path={rel} />
     </main>
   );

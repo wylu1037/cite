@@ -2,6 +2,27 @@
 @import 'fumadocs-ui/css/neutral.css';
 @import 'fumadocs-ui/css/preset.css';
 
+@theme {
+  --font-sans:
+    ui-sans-serif, system-ui, -apple-system, 'PingFang SC', 'Hiragino Sans GB',
+    'Noto Sans CJK SC', 'Microsoft YaHei', sans-serif;
+
+  --color-linear-canvas: #010102;
+  --color-linear-surface-1: #0f1011;
+  --color-linear-surface-2: #141516;
+  --color-linear-surface-3: #18191a;
+  --color-linear-surface-4: #191a1b;
+  --color-linear-hairline: #23252a;
+  --color-linear-hairline-strong: #34343a;
+  --color-linear-primary: #5e6ad2;
+  --color-linear-primary-hover: #828fff;
+  --color-linear-primary-focus: #5e69d1;
+  --color-linear-ink: #f7f8f8;
+  --color-linear-ink-muted: #d0d6e0;
+  --color-linear-ink-subtle: #8a8f98;
+  --color-linear-ink-tertiary: #62666d;
+}
+
 html {
   scrollbar-gutter: stable;
 }
@@ -9,10 +30,4 @@ html {
 html > body[data-scroll-locked] {
   margin-right: 0px !important;
   --removed-body-scroll-bar-size: 0px !important;
-}
-
-@theme {
-  --font-sans:
-    ui-sans-serif, system-ui, -apple-system, 'PingFang SC', 'Hiragino Sans GB',
-    'Noto Sans CJK SC', 'Microsoft YaHei', sans-serif;
 }

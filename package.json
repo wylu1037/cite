@@ -12,11 +12,14 @@
     "prepare": "husky"
   },
   "dependencies": {
+    "@base-ui-components/react": "1.0.0-rc.0",
     "@fumadocs/language": "^0.2.14",
     "@fumadocs/local-md": "^0.3.5",
     "@prisma/adapter-pg": "7.10.0",
     "@prisma/client": "^7.10.1",
     "@zbsearch/tokenizers": "^4.0.1",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
     "cn": "^0.4.0",
     "fumadocs-core": "^16.17.4",
     "fumadocs-ui": "npm:@fumadocs/base-ui@^16.17.4",
@@ -25,6 +28,7 @@
     "pg": "^8.23.1",
     "react": "^19.3.0",
     "react-dom": "^19.3.0",
+    "tailwind-merge": "^3.7.0",
     "zod": "^4.0.0"
   },
   "devDependencies": {
