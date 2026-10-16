@@ -88,7 +88,7 @@ export async function saveMeta(dirRaw: string, meta: unknown) {
   const rel = dir ? `${dir}/meta.json` : 'meta.json';
   await mkdir(path.join(docsDir, dir), { recursive: true });
   await writeFile(path.join(docsDir, rel), `${JSON.stringify(out, null, 2)}\n`, 'utf8');
-  await commitAll(`更新侧栏 ${rel}`);
+  await commitAll(`docs(meta): update sidebar ${rel}`);
   try {
     invalidateDoc(rel);
   } catch {}

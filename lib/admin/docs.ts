@@ -113,11 +113,11 @@ async function ensureRepo() {
   try {
     await git(['rev-parse', '--git-dir']);
   } catch {
-    await git(['init']);
+    await git(['init', '-b', 'main']);
     await git(['config', 'user.name', 'kb-admin']).catch(() => {});
     await git(['config', 'user.email', 'kb-admin@local']).catch(() => {});
     await git(['add', '-A']).catch(() => {});
-    await git(['commit', '-m', '初始化内容仓库', '--allow-empty']).catch(() => {});
+    await git(['commit', '-m', 'chore(content): initialize content repository', '--allow-empty']).catch(() => {});
   }
 }
 
@@ -137,7 +137,7 @@ export async function publish(rel: string) {
   } else if (!(await exists(dst))) {
     throw new AdminError('草稿不存在，无法发布');
   }
-  await commitAll(`发布 ${r}`);
+  await commitAll(`docs(content): publish ${r}`);
   try {
     invalidateDoc(r);
   } catch {}
@@ -148,7 +148,7 @@ export async function deleteDoc(rel: string) {
   const r = safeRel(rel);
   await rm(absDoc(r), { force: true });
   await rm(absDraft(r), { force: true });
-  await commitAll(`删除 ${r}`);
+  await commitAll(`docs(content): delete ${r}`);
   try {
     invalidateDoc(r);
   } catch {}
@@ -194,7 +194,7 @@ export async function revert(rel: string, rev: string) {
   await mkdir(path.dirname(absDoc(r)), { recursive: true });
   await writeFile(absDoc(r), content, 'utf8');
   await rm(absDraft(r), { force: true });
-  await commitAll(`回滚 ${r} 至 ${rev}`);
+  await commitAll(`docs(content): revert ${r} to ${rev}`);
   try {
     invalidateDoc(r);
   } catch {}
