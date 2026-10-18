@@ -2,6 +2,9 @@
 @import 'fumadocs-ui/css/neutral.css';
 @import 'fumadocs-ui/css/preset.css';
 
+/* prettier-ignore */
+@source not inline("[&_::highlight(fd-search)]:text-fd-primary [&_::highlight(fd-search)]:underline");
+
 @theme {
   --font-sans:
     ui-sans-serif, system-ui, -apple-system, 'PingFang SC', 'Hiragino Sans GB',
@@ -27,6 +30,11 @@ html {
   scrollbar-gutter: stable;
 }
 
+/* The homepage uses spacing and surface changes to group its content. */
+body:has([data-home-page]) #nd-nav > nav {
+  border-bottom-width: 0;
+}
+
 html > body[data-scroll-locked] {
   margin-right: 0px !important;
   --removed-body-scroll-bar-size: 0px !important;
@@ -35,12 +43,14 @@ html > body[data-scroll-locked] {
 /* Documentation layout: pin sidebar to left edge and adjust width */
 @media (min-width: 768px) {
   #nd-docs-layout {
-    grid-template-columns: var(--fd-sidebar-col) minmax(0, 1fr) var(--fd-toc-width) !important;
+    grid-template-columns: var(--fd-sidebar-col) minmax(0, 1fr) var(
+        --fd-toc-width
+      ) !important;
     grid-template-areas:
-      "sidebar header toc"
-      "sidebar toc-popover toc"
-      "sidebar tabs toc"
-      "sidebar main toc" !important;
+      'sidebar header toc'
+      'sidebar toc-popover toc'
+      'sidebar tabs toc'
+      'sidebar main toc' !important;
     --fd-sidebar-width: 290px !important;
   }
 
@@ -49,3 +59,30 @@ html > body[data-scroll-locked] {
   }
 }
 
+@keyframes marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(calc(-100% - var(--gap, 1rem)));
+  }
+}
+
+@keyframes marquee-vertical {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(calc(-100% - var(--gap, 1rem)));
+  }
+}
+
+@layer utilities {
+  .animate-marquee {
+    animation: marquee var(--duration, 40s) linear infinite;
+  }
+
+  .animate-marquee-vertical {
+    animation: marquee-vertical var(--duration, 40s) linear infinite;
+  }
+}

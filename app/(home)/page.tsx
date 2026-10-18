@@ -1,19 +1,24 @@
-import Link from 'next/link';
+import type { Metadata } from 'next';
+import { HeroSection } from '@/components/home/hero-section';
+import { KnowledgeTree } from '@/components/home/knowledge-tree';
+import { CoreEngine } from '@/components/home/core-engine';
+import { LivePulse } from '@/components/home/live-pulse';
+import { CtaFooter } from '@/components/home/cta-footer';
+
+export const metadata: Metadata = {
+  title: '知识库 · 部门文档资产与研发智能统一入口',
+  description:
+    '汇聚产品文档、开发联调规范、部署运维手册与团队工程最佳实践，集成 RAG 向量语义问答与全站全文检索。',
+};
 
 export default function HomePage() {
   return (
-    <div className="flex flex-col justify-center text-center flex-1 gap-3">
-      <h1 className="text-3xl font-bold">知识库</h1>
-      <p className="text-fd-muted-foreground">
-        部门文档统一入口，支持全文搜索，右上角可直接问 AI。
-      </p>
-      <p>
-        打开{' '}
-        <Link href="/docs" className="font-medium underline">
-          /docs
-        </Link>{' '}
-        开始阅读。
-      </p>
+    <div data-home-page className="flex flex-1 flex-col">
+      <HeroSection />
+      <KnowledgeTree />
+      <CoreEngine />
+      <LivePulse />
+      <CtaFooter />
     </div>
   );
 }
