@@ -17,8 +17,18 @@ import {
 } from 'lucide-react';
 
 type Source = { title: string; url: string; heading: string; content: string };
-type Msg = { role: 'user' | 'assistant'; content: string; sources?: Source[]; note?: string };
-type StreamEvent = { type?: string; text?: string; sources?: Source[]; message?: string };
+type Msg = {
+  role: 'user' | 'assistant';
+  content: string;
+  sources?: Source[];
+  note?: string;
+};
+type StreamEvent = {
+  type?: string;
+  text?: string;
+  sources?: Source[];
+  message?: string;
+};
 
 const PROMPT_SUGGESTIONS = [
   '后台怎么新建并发布一篇文档？',
@@ -38,12 +48,12 @@ function CodeBlock({ code }: { code: string }) {
   }
 
   return (
-    <div className="relative my-3 rounded-[8px] border border-zinc-200 dark:border-[#23252a] bg-zinc-950 text-zinc-100 overflow-hidden shadow-xs">
-      <div className="flex items-center justify-between border-b border-zinc-800 bg-zinc-900/80 px-3 py-1.5 text-[11px] text-zinc-400">
+    <div className="relative my-3 overflow-hidden rounded-[8px] border border-zinc-200 bg-zinc-950 text-zinc-100 shadow-xs dark:border-linear-hairline">
+      <div className="flex items-center justify-between border-b border-zinc-800 bg-zinc-900/80 px-3 py-1.5 text-xs text-zinc-400">
         <span className="font-mono">代码片段</span>
         <button
           onClick={copy}
-          className="flex items-center gap-1 hover:text-white transition-colors"
+          className="flex items-center gap-1 transition-colors hover:text-white"
           title="复制代码"
         >
           {copied ? (
@@ -70,15 +80,18 @@ function CodeBlock({ code }: { code: string }) {
 function AnswerText({ text, sources }: { text: string; sources?: Source[] }) {
   const fence = text.split('```');
   return (
-    <div className="space-y-2 text-xs sm:text-sm leading-relaxed text-zinc-800 dark:text-[#f7f8f8]">
+    <div className="space-y-2 text-xs leading-relaxed text-zinc-800 sm:text-sm dark:text-linear-ink">
       {fence.map((part, i) =>
         i % 2 === 1 ? (
-          <CodeBlock key={i} code={part.replace(/^[a-zA-Z]*\n/, '').trimEnd()} />
+          <CodeBlock
+            key={i}
+            code={part.replace(/^[a-zA-Z]*\n/, '').trimEnd()}
+          />
         ) : (
           <span key={i} className="whitespace-pre-wrap">
             {inline(part, sources)}
           </span>
-        ),
+        )
       )}
     </div>
   );
@@ -93,18 +106,21 @@ function inline(text: string, sources?: Source[]): ReactNode[] {
     if (m.index > last) out.push(text.slice(last, m.index));
     if (m[1] !== undefined) {
       out.push(
-        <strong key={out.length} className="font-semibold text-zinc-900 dark:text-white">
+        <strong
+          key={out.length}
+          className="font-semibold text-zinc-900 dark:text-white"
+        >
           {m[1]}
-        </strong>,
+        </strong>
       );
     } else if (m[2] !== undefined) {
       out.push(
         <code
           key={out.length}
-          className="rounded-[4px] border border-zinc-200 dark:border-[#23252a] bg-zinc-100 dark:bg-[#141516] px-1.5 py-0.5 font-mono text-[11px] text-[#5e6ad2] dark:text-[#828fff]"
+          className="rounded-[4px] border border-zinc-200 bg-zinc-100 px-1.5 py-0.5 font-mono text-xs text-linear-primary dark:border-linear-hairline dark:bg-linear-surface-2 dark:text-linear-primary-hover"
         >
           {m[2]}
-        </code>,
+        </code>
       );
     } else {
       const n = Number(m[3]);
@@ -117,10 +133,10 @@ function inline(text: string, sources?: Source[]): ReactNode[] {
             title={`${s.title}${s.heading ? ` · ${s.heading}` : ''}`}
             target="_blank"
             rel="noreferrer"
-            className="inline-flex items-center gap-0.5 mx-0.5 rounded-full border border-[#5e6ad2]/20 dark:border-[#5e6ad2]/30 bg-[#5e6ad2]/10 dark:bg-[#5e6ad2]/15 px-1.5 py-0.2 text-[10px] font-mono text-[#5e6ad2] dark:text-[#828fff] hover:bg-[#5e6ad2]/20 dark:hover:bg-[#5e6ad2]/30 transition-colors"
+            className="py-0.2 mx-0.5 inline-flex items-center gap-0.5 rounded-full border border-linear-primary/20 bg-linear-primary/10 px-1.5 font-mono text-xs text-linear-primary transition-colors hover:bg-linear-primary/20 dark:border-linear-primary/30 dark:bg-linear-primary/15 dark:text-linear-primary-hover dark:hover:bg-linear-primary/30"
           >
             [{n}]
-          </a>,
+          </a>
         );
       } else {
         out.push(m[0]);
@@ -132,16 +148,24 @@ function inline(text: string, sources?: Source[]): ReactNode[] {
   return out;
 }
 
-export function AskClient() {
+export function AskClient({ initialQuery }: { initialQuery?: string }) {
   const [messages, setMessages] = useState<Msg[]>([]);
-  const [input, setInput] = useState('');
+  const [input, setInput] = useState(initialQuery ?? '');
   const [busy, setBusy] = useState(false);
   const endRef = useRef<HTMLDivElement>(null);
   const taRef = useRef<HTMLTextAreaElement>(null);
+  const initialSentRef = useRef(false);
 
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
+
+  useEffect(() => {
+    if (initialQuery && !initialSentRef.current) {
+      initialSentRef.current = true;
+      void send(initialQuery);
+    }
+  }, [initialQuery]);
 
   async function send(queryText?: string) {
     const q = (queryText ?? input).trim();
@@ -152,7 +176,9 @@ export function AskClient() {
     setMessages([...history, { role: 'assistant', content: '' }]);
 
     const patchLast = (patch: (m: Msg) => Msg) =>
-      setMessages((cur) => cur.map((m, i) => (i === cur.length - 1 ? patch(m) : m)));
+      setMessages((cur) =>
+        cur.map((m, i) => (i === cur.length - 1 ? patch(m) : m))
+      );
 
     try {
       const res = await fetch('/api/chat', {
@@ -164,7 +190,11 @@ export function AskClient() {
       });
       const ct = res.headers.get('content-type') ?? '';
       if (ct.includes('application/json')) {
-        const json = (await res.json()) as { note?: string; error?: string; sources?: Source[] };
+        const json = (await res.json()) as {
+          note?: string;
+          error?: string;
+          sources?: Source[];
+        };
         patchLast((m) => ({
           ...m,
           content: json.note ?? json.error ?? '（暂未在知识库中找到相关内容）',
@@ -191,14 +221,24 @@ export function AskClient() {
           } catch {
             continue;
           }
-          if (j.type === 'sources') patchLast((m) => ({ ...m, sources: j.sources }));
-          else if (j.type === 'delta') patchLast((m) => ({ ...m, content: m.content + (j.text ?? '') }));
+          if (j.type === 'sources')
+            patchLast((m) => ({ ...m, sources: j.sources }));
+          else if (j.type === 'delta')
+            patchLast((m) => ({ ...m, content: m.content + (j.text ?? '') }));
           else if (j.type === 'error')
-            patchLast((m) => ({ ...m, content: m.content || `（出错了：${j.message ?? '未知错误'}）` }));
+            patchLast((m) => ({
+              ...m,
+              content: m.content || `（出错了：${j.message ?? '未知错误'}）`,
+            }));
         }
       }
     } catch (e) {
-      patchLast((m) => ({ ...m, content: m.content || `请求失败：${e instanceof Error ? e.message : '网络错误'}` }));
+      patchLast((m) => ({
+        ...m,
+        content:
+          m.content ||
+          `请求失败：${e instanceof Error ? e.message : '网络错误'}`,
+      }));
     } finally {
       setBusy(false);
     }
@@ -211,26 +251,26 @@ export function AskClient() {
   }
 
   return (
-    <div className="flex-1 flex flex-col justify-between">
+    <div className="flex flex-1 flex-col justify-between">
       {/* Empty State: Centered Hero & Input */}
       {messages.length === 0 ? (
-        <div className="my-auto py-6 sm:py-12 flex flex-col items-center text-center space-y-6">
+        <div className="my-auto flex flex-col items-center space-y-6 py-6 text-center sm:py-12">
           {/* Header */}
-          <div className="space-y-3 max-w-xl">
-            <div className="inline-flex items-center gap-1.5 rounded-full border border-[#5e6ad2]/25 bg-[#5e6ad2]/10 px-3 py-1 text-xs font-medium text-[#5e6ad2] dark:text-[#828fff]">
+          <div className="max-w-xl space-y-3">
+            <div className="inline-flex items-center gap-1.5 rounded-full border border-linear-primary/25 bg-linear-primary/10 px-3 py-1 text-xs font-medium text-linear-primary dark:text-linear-primary-hover">
               <Sparkles className="h-3.5 w-3.5" />
               <span>Ask AI · 部门知识库智能问答</span>
             </div>
-            <h1 className="text-2xl sm:text-4xl font-bold tracking-tight text-zinc-900 dark:text-[#f7f8f8]">
+            <h1 className="text-2xl font-bold tracking-tight text-zinc-900 sm:text-4xl dark:text-linear-ink">
               有什么可以帮您查阅？
             </h1>
-            <p className="text-xs sm:text-sm text-zinc-500 dark:text-[#8a8f98] leading-relaxed">
+            <p className="text-xs leading-relaxed text-zinc-500 sm:text-sm dark:text-linear-ink-subtle">
               基于站内已发布文档进行精准语义检索与大模型推理，所有回答均包含文档来源直达锚点。
             </p>
           </div>
 
           {/* Central Search/Input Box */}
-          <div className="w-full max-w-2xl text-left rounded-2xl border border-zinc-200 dark:border-[#23252a] bg-white dark:bg-[#0f1011] p-3.5 shadow-xl shadow-zinc-200/50 dark:shadow-[0_12px_40px_rgba(0,0,0,0.8)] focus-within:border-[#5e6ad2] focus-within:ring-2 focus-within:ring-[#5e6ad2]/20 transition-all">
+          <div className="w-full max-w-2xl rounded-2xl border border-zinc-200 bg-white p-3.5 text-left shadow-xl shadow-zinc-200/50 transition-all focus-within:border-linear-primary focus-within:ring-2 focus-within:ring-linear-primary/20 dark:border-linear-hairline dark:bg-linear-surface-1 dark:shadow-[0_12px_40px_rgba(0,0,0,0.8)]">
             <textarea
               ref={taRef}
               value={input}
@@ -243,10 +283,10 @@ export function AskClient() {
               }}
               rows={3}
               placeholder="向知识库提问任何技术规范、部署指引或系统使用方法…"
-              className="w-full resize-none bg-transparent text-sm text-zinc-900 dark:text-[#f7f8f8] placeholder:text-zinc-400 dark:placeholder:text-[#62666d] focus:outline-none leading-relaxed"
+              className="w-full resize-none bg-transparent text-sm leading-relaxed text-zinc-900 placeholder:text-zinc-400 focus:outline-none dark:text-linear-ink dark:placeholder:text-linear-ink-tertiary"
             />
-            <div className="flex items-center justify-between border-t border-zinc-100 dark:border-[#23252a]/60 pt-2.5 mt-2">
-              <span className="text-[11px] text-zinc-400 dark:text-[#62666d] flex items-center gap-1.5">
+            <div className="mt-2 flex items-center justify-between border-t border-zinc-100 pt-2.5 dark:border-linear-hairline/60">
+              <span className="flex items-center gap-1.5 text-xs text-zinc-400 dark:text-linear-ink-tertiary">
                 按 <Kbd>Enter</Kbd> 发送，<Kbd>Shift + Enter</Kbd> 换行
               </span>
               <Button
@@ -256,16 +296,16 @@ export function AskClient() {
                 disabled={busy || !input.trim()}
                 className="h-8 px-4 text-xs font-medium"
               >
-                <Send className="h-3.5 w-3.5 mr-1" />
+                <Send className="mr-1 h-3.5 w-3.5" />
                 提问
               </Button>
             </div>
           </div>
 
           {/* Prompt Suggestions */}
-          <div className="w-full max-w-2xl space-y-2.5 text-left pt-2">
-            <div className="flex items-center gap-1.5 text-[11px] font-medium text-zinc-400 dark:text-[#62666d]">
-              <Lightbulb className="h-3.5 w-3.5 text-[#5e6ad2]" />
+          <div className="w-full max-w-2xl space-y-2.5 pt-2 text-left">
+            <div className="flex items-center gap-1.5 text-xs font-medium text-zinc-400 dark:text-linear-ink-tertiary">
+              <Lightbulb className="h-3.5 w-3.5 text-linear-primary" />
               <span>常见问题快捷探索：</span>
             </div>
             <div className="flex flex-wrap gap-2">
@@ -274,9 +314,11 @@ export function AskClient() {
                   key={idx}
                   type="button"
                   onClick={() => void send(s)}
-                  className="flex items-center gap-1.5 rounded-full border border-zinc-200 dark:border-[#23252a] bg-white dark:bg-[#0f1011] px-3.5 py-1.5 text-xs text-zinc-700 dark:text-[#d0d6e0] hover:border-[#5e6ad2] hover:text-[#5e6ad2] dark:hover:border-[#5e6ad2] dark:hover:text-[#828fff] transition-all shadow-xs hover:shadow-sm"
+                  className="flex items-center gap-1.5 rounded-full border border-zinc-200 bg-white px-3.5 py-1.5 text-xs text-zinc-700 shadow-xs transition-all hover:border-linear-primary hover:text-linear-primary hover:shadow-sm dark:border-linear-hairline dark:bg-linear-surface-1 dark:text-linear-ink-muted dark:hover:border-linear-primary dark:hover:text-linear-primary-hover"
                 >
-                  <span className="text-zinc-400 dark:text-[#62666d]">✦</span>
+                  <span className="text-zinc-400 dark:text-linear-ink-tertiary">
+                    ✦
+                  </span>
                   <span>{s}</span>
                 </button>
               ))}
@@ -285,17 +327,17 @@ export function AskClient() {
         </div>
       ) : (
         /* Conversation Mode */
-        <div className="space-y-6 flex-1 flex flex-col">
+        <div className="flex flex-1 flex-col space-y-6">
           {/* Conversation Top Bar */}
-          <div className="flex items-center justify-between border-b border-zinc-200 dark:border-[#23252a] pb-3">
+          <div className="flex items-center justify-between border-b border-zinc-200 pb-3 dark:border-linear-hairline">
             <div className="flex items-center gap-2">
-              <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[#5e6ad2]/15 text-[#5e6ad2] dark:text-[#828fff]">
+              <span className="flex h-5 w-5 items-center justify-center rounded-full bg-linear-primary/15 text-linear-primary dark:text-linear-primary-hover">
                 <Sparkles className="h-3 w-3" />
               </span>
-              <span className="text-xs font-semibold text-zinc-900 dark:text-[#f7f8f8]">
+              <span className="text-xs font-semibold text-zinc-900 dark:text-linear-ink">
                 Ask AI 对话中
               </span>
-              <span className="text-[11px] text-zinc-400 dark:text-[#62666d]">
+              <span className="text-xs text-zinc-400 dark:text-linear-ink-tertiary">
                 （共 {messages.length} 条消息）
               </span>
             </div>
@@ -306,13 +348,13 @@ export function AskClient() {
               disabled={busy}
               className="h-7 text-xs"
             >
-              <RotateCcw className="h-3 w-3 mr-1" />
+              <RotateCcw className="mr-1 h-3 w-3" />
               开启新对话
             </Button>
           </div>
 
           {/* Messages Stream */}
-          <div className="space-y-6 flex-1">
+          <div className="flex-1 space-y-6">
             {messages.map((m, i) => (
               <div
                 key={i}
@@ -322,27 +364,29 @@ export function AskClient() {
               >
                 {/* User Message */}
                 {m.role === 'user' ? (
-                  <div className="rounded-2xl rounded-tr-sm bg-zinc-900 dark:bg-[#141516] text-white dark:text-[#f7f8f8] border border-zinc-800 dark:border-[#23252a] px-4 py-2.5 text-xs sm:text-sm max-w-xl shadow-xs">
-                    <p className="whitespace-pre-wrap leading-relaxed">{m.content}</p>
+                  <div className="max-w-xl rounded-2xl rounded-tr-sm border border-zinc-800 bg-zinc-900 px-4 py-2.5 text-xs text-white shadow-xs sm:text-sm dark:border-linear-hairline dark:bg-linear-surface-2 dark:text-linear-ink">
+                    <p className="leading-relaxed whitespace-pre-wrap">
+                      {m.content}
+                    </p>
                   </div>
                 ) : (
                   /* Assistant Message */
-                  <div className="w-full flex flex-col items-start space-y-2">
-                    <div className="flex items-center gap-1.5 text-xs font-medium text-[#5e6ad2] dark:text-[#828fff]">
+                  <div className="flex w-full flex-col items-start space-y-2">
+                    <div className="flex items-center gap-1.5 text-xs font-medium text-linear-primary dark:text-linear-primary-hover">
                       <Sparkles className="h-3.5 w-3.5" />
                       <span>知识库助手</span>
                     </div>
 
-                    <div className="w-full rounded-2xl border border-zinc-200 dark:border-[#23252a] bg-white dark:bg-[#0f1011] p-4 sm:p-5 shadow-xs dark:shadow-[0_4px_24px_rgba(0,0,0,0.5)]">
+                    <div className="w-full rounded-2xl border border-zinc-200 bg-white p-4 shadow-xs sm:p-5 dark:border-linear-hairline dark:bg-linear-surface-1 dark:shadow-[0_4px_24px_rgba(0,0,0,0.5)]">
                       {m.content ? (
                         <AnswerText text={m.content} sources={m.sources} />
                       ) : busy && i === messages.length - 1 ? (
-                        <div className="flex items-center gap-2 text-xs text-zinc-400 dark:text-[#8a8f98] py-2">
-                          <div className="h-2 w-2 rounded-full bg-[#5e6ad2] animate-ping" />
+                        <div className="flex items-center gap-2 py-2 text-xs text-zinc-400 dark:text-linear-ink-subtle">
+                          <div className="h-2 w-2 animate-ping rounded-full bg-linear-primary" />
                           <span>正在检索知识库文档并组织回答…</span>
                         </div>
                       ) : (
-                        <span className="text-xs text-zinc-400 dark:text-[#8a8f98]">
+                        <span className="text-xs text-zinc-400 dark:text-linear-ink-subtle">
                           （暂无内容）
                         </span>
                       )}
@@ -350,32 +394,34 @@ export function AskClient() {
 
                     {/* Sources References Grid */}
                     {!!m.sources?.length && (
-                      <div className="w-full rounded-xl border border-zinc-200 dark:border-[#23252a] bg-zinc-50 dark:bg-[#141516]/60 p-3 text-xs mt-1">
-                        <div className="flex items-center gap-1.5 font-medium text-zinc-600 dark:text-[#8a8f98] mb-2.5">
-                          <BookOpen className="h-3.5 w-3.5 text-[#5e6ad2]" />
+                      <div className="mt-1 w-full rounded-xl border border-zinc-200 bg-zinc-50 p-3 text-xs dark:border-linear-hairline dark:bg-linear-surface-2/60">
+                        <div className="mb-2.5 flex items-center gap-1.5 font-medium text-zinc-600 dark:text-linear-ink-subtle">
+                          <BookOpen className="h-3.5 w-3.5 text-linear-primary" />
                           <span>引用来源文档（点击直达对应章节）：</span>
                         </div>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
                           {m.sources.map((s, j) => (
                             <a
                               key={j}
                               href={s.url}
                               target="_blank"
                               rel="noreferrer"
-                              className="flex items-center justify-between rounded-[8px] border border-zinc-200 dark:border-[#23252a] bg-white dark:bg-[#0f1011] p-2.5 text-zinc-700 dark:text-[#d0d6e0] hover:border-[#5e6ad2] hover:text-[#5e6ad2] dark:hover:text-[#828fff] transition-colors group shadow-2xs"
+                              className="group flex items-center justify-between rounded-[8px] border border-zinc-200 bg-white p-2.5 text-zinc-700 shadow-2xs transition-colors hover:border-linear-primary hover:text-linear-primary dark:border-linear-hairline dark:bg-linear-surface-1 dark:text-linear-ink-muted dark:hover:text-linear-primary-hover"
                             >
                               <div className="flex items-center gap-1.5 truncate">
-                                <span className="font-mono text-[#5e6ad2] dark:text-[#828fff] font-semibold shrink-0">
+                                <span className="shrink-0 font-mono font-semibold text-linear-primary dark:text-linear-primary-hover">
                                   [{j + 1}]
                                 </span>
-                                <span className="truncate font-medium">{s.title}</span>
+                                <span className="truncate font-medium">
+                                  {s.title}
+                                </span>
                                 {s.heading && (
-                                  <span className="text-zinc-400 dark:text-[#62666d] truncate text-[11px]">
+                                  <span className="truncate text-xs text-zinc-400 dark:text-linear-ink-tertiary">
                                     · {s.heading}
                                   </span>
                                 )}
                               </div>
-                              <ExternalLink className="h-3 w-3 text-zinc-400 dark:text-[#62666d] group-hover:text-[#5e6ad2] shrink-0 ml-1.5" />
+                              <ExternalLink className="ml-1.5 h-3 w-3 shrink-0 text-zinc-400 group-hover:text-linear-primary dark:text-linear-ink-tertiary" />
                             </a>
                           ))}
                         </div>
@@ -390,7 +436,7 @@ export function AskClient() {
 
           {/* Sticky Bottom Input Bar in Conversation Mode */}
           <div className="sticky bottom-4 z-20 w-full pt-2">
-            <div className="rounded-2xl border border-zinc-200 dark:border-[#23252a] bg-white/95 dark:bg-[#0f1011]/95 backdrop-blur p-3 shadow-lg shadow-zinc-200/50 dark:shadow-[0_8px_32px_rgba(0,0,0,0.8)] focus-within:border-[#5e6ad2] focus-within:ring-2 focus-within:ring-[#5e6ad2]/20 transition-all">
+            <div className="rounded-2xl border border-zinc-200 bg-white/95 p-3 shadow-lg shadow-zinc-200/50 backdrop-blur transition-all focus-within:border-linear-primary focus-within:ring-2 focus-within:ring-linear-primary/20 dark:border-linear-hairline dark:bg-linear-surface-1/95 dark:shadow-[0_8px_32px_rgba(0,0,0,0.8)]">
               <textarea
                 ref={taRef}
                 value={input}
@@ -403,29 +449,29 @@ export function AskClient() {
                 }}
                 rows={2}
                 placeholder="继续追问或输入新问题…"
-                className="w-full resize-none bg-transparent text-sm text-zinc-900 dark:text-[#f7f8f8] placeholder:text-zinc-400 dark:placeholder:text-[#62666d] focus:outline-none"
+                className="w-full resize-none bg-transparent text-sm text-zinc-900 placeholder:text-zinc-400 focus:outline-none dark:text-linear-ink dark:placeholder:text-linear-ink-tertiary"
               />
 
-              <div className="mt-1.5 flex items-center justify-between border-t border-zinc-100 dark:border-[#23252a]/60 pt-2 text-[11px] text-zinc-400 dark:text-[#62666d]">
+              <div className="mt-1.5 flex items-center justify-between border-t border-zinc-100 pt-2 text-xs text-zinc-400 dark:border-linear-hairline/60 dark:text-linear-ink-tertiary">
                 <span className="hidden sm:inline">
                   按 <Kbd>Enter</Kbd> 发送，<Kbd>Shift + Enter</Kbd> 换行
                 </span>
-                <div className="flex items-center gap-2 ml-auto">
+                <div className="ml-auto flex items-center gap-2">
                   <Button
                     variant="primary"
                     size="sm"
                     onClick={() => void send()}
                     disabled={busy || !input.trim()}
-                    className="h-7 text-xs px-3"
+                    className="h-7 px-3 text-xs"
                   >
                     {busy ? (
                       <>
-                        <div className="h-3 w-3 border-2 border-white border-t-transparent rounded-full animate-spin mr-1" />
+                        <div className="mr-1 h-3 w-3 animate-spin rounded-full border-2 border-white border-t-transparent" />
                         回答中…
                       </>
                     ) : (
                       <>
-                        <Send className="h-3 w-3 mr-1" />
+                        <Send className="mr-1 h-3 w-3" />
                         发送
                       </>
                     )}

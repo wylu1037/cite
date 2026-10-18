@@ -6,10 +6,13 @@ export const metadata: Metadata = {
   description: '基于站内文档的 RAG 语义检索与带引用智能问答',
 };
 
-export default function AskPage() {
+export default async function AskPage(props: {
+  searchParams: Promise<{ q?: string }>;
+}) {
+  const searchParams = await props.searchParams;
   return (
-    <div className="flex-1 w-full max-w-4xl mx-auto px-4 py-6 md:py-10 flex flex-col">
-      <AskClient />
+    <div className="mx-auto flex w-full max-w-4xl flex-1 flex-col px-4 py-6 md:py-10">
+      <AskClient initialQuery={searchParams.q} />
     </div>
   );
 }
