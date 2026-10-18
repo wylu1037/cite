@@ -5,7 +5,13 @@ import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from '@/components/ui/card';
 import { Kbd } from '@/components/ui/kbd';
 import {
   ArrowLeft,
@@ -108,14 +114,17 @@ export function Editor({ path }: { path: string }) {
 
   async function openHistory() {
     setBusy('读取历史');
-    const res = await fetch(`/api/admin/history?path=${encodeURIComponent(path)}`);
+    const res = await fetch(
+      `/api/admin/history?path=${encodeURIComponent(path)}`
+    );
     const data = await res.json().catch(() => ({ history: [] }));
     setBusy('');
     setHistory(Array.isArray(data.history) ? data.history : []);
   }
 
   async function doRevert(rev: string) {
-    if (!confirm(`回滚到 ${rev}？当前内容会自动提交一次 Git 历史，不会丢失。`)) return;
+    if (!confirm(`回滚到 ${rev}？当前内容会自动提交一次 Git 历史，不会丢失。`))
+      return;
     setBusy('回滚');
     const res = await fetch('/api/admin/revert', {
       method: 'POST',
@@ -136,7 +145,10 @@ export function Editor({ path }: { path: string }) {
     setBusy('上传图片');
     const form = new FormData();
     form.append('file', file);
-    const res = await fetch('/api/admin/upload', { method: 'POST', body: form });
+    const res = await fetch('/api/admin/upload', {
+      method: 'POST',
+      body: form,
+    });
     const data = await res.json().catch(() => ({}));
     setBusy('');
     if (res.ok && typeof data.url === 'string') {
@@ -157,12 +169,16 @@ export function Editor({ path }: { path: string }) {
 
   const noExt = path.replace(/\.(mdx?|md)$/i, '');
   const siteUrl =
-    noExt === 'index' ? '/docs' : noExt.endsWith('/index') ? `/docs/${noExt.slice(0, -6)}` : `/docs/${noExt}`;
+    noExt === 'index'
+      ? '/docs'
+      : noExt.endsWith('/index')
+        ? `/docs/${noExt.slice(0, -6)}`
+        : `/docs/${noExt}`;
 
   if (content === null) {
     return (
-      <div className="flex h-64 items-center justify-center text-xs text-[#8a8f98]">
-        <div className="animate-spin h-5 w-5 border-2 border-[#5e6ad2] border-t-transparent rounded-full mr-2" />
+      <div className="flex h-64 items-center justify-center text-xs text-linear-ink-subtle">
+        <div className="mr-2 h-5 w-5 animate-spin rounded-full border-2 border-linear-primary border-t-transparent" />
         加载文档中…
       </div>
     );
@@ -171,16 +187,16 @@ export function Editor({ path }: { path: string }) {
   return (
     <div className="space-y-4">
       {/* Top Header Bar */}
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#23252a] pb-4">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-linear-hairline pb-4">
         <div className="flex items-center gap-3">
           <Link href="/admin">
             <Button variant="ghost" size="sm" className="h-7 text-xs">
-              <ArrowLeft className="h-3.5 w-3.5 mr-1" />
+              <ArrowLeft className="mr-1 h-3.5 w-3.5" />
               返回
             </Button>
           </Link>
           <div className="flex items-center gap-2">
-            <span className="font-mono text-xs text-[#f7f8f8] bg-[#141516] border border-[#23252a] px-2 py-0.5 rounded-[6px]">
+            <span className="rounded-[6px] border border-linear-hairline bg-linear-surface-2 px-2 py-0.5 font-mono text-xs text-linear-ink">
               {path}
             </span>
             {draft ? (
@@ -202,8 +218,12 @@ export function Editor({ path }: { path: string }) {
         <div className="flex items-center gap-2">
           {published && (
             <a href={siteUrl} target="_blank" rel="noreferrer">
-              <Button variant="ghost" size="sm" className="h-7 text-xs text-[#8a8f98] hover:text-[#f7f8f8]">
-                <ExternalLink className="h-3 w-3 mr-1" />
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-7 text-xs text-linear-ink-subtle hover:text-linear-ink"
+              >
+                <ExternalLink className="mr-1 h-3 w-3" />
                 前台查看
               </Button>
             </a>
@@ -212,7 +232,7 @@ export function Editor({ path }: { path: string }) {
       </div>
 
       {/* Editor Action Toolbar */}
-      <div className="flex flex-wrap items-center justify-between gap-2 rounded-[8px] border border-[#23252a] bg-[#0f1011] p-2">
+      <div className="flex flex-wrap items-center justify-between gap-2 rounded-[8px] border border-linear-hairline bg-linear-surface-1 p-2">
         <div className="flex flex-wrap items-center gap-2">
           <Button
             variant="secondary"
@@ -261,7 +281,7 @@ export function Editor({ path }: { path: string }) {
             onClick={openHistory}
             disabled={!!busy}
           >
-            <History className="h-3.5 w-3.5 text-[#828fff]" />
+            <History className="h-3.5 w-3.5 text-linear-primary-hover" />
             版本历史
           </Button>
         </div>
@@ -273,7 +293,7 @@ export function Editor({ path }: { path: string }) {
             onClick={remove}
             disabled={!!busy}
           >
-            <Trash2 className="h-3.5 w-3.5 mr-1" />
+            <Trash2 className="mr-1 h-3.5 w-3.5" />
             删除
           </Button>
         </div>
@@ -281,20 +301,20 @@ export function Editor({ path }: { path: string }) {
 
       {/* Status Tip */}
       {message && (
-        <div className="flex items-center gap-2 rounded-[6px] border border-[#23252a] bg-[#141516] p-2.5 text-xs text-[#d0d6e0]">
-          <CheckCircle2 className="h-3.5 w-3.5 text-[#828fff] shrink-0" />
+        <div className="flex items-center gap-2 rounded-[6px] border border-linear-hairline bg-linear-surface-2 p-2.5 text-xs text-linear-ink-muted">
+          <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-linear-primary-hover" />
           <span>{busy ? `正在执行：${busy}…` : message}</span>
         </div>
       )}
 
       {/* Editor Textarea */}
-      <div className="rounded-[12px] border border-[#23252a] bg-[#0f1011] overflow-hidden shadow-[0_8px_32px_rgba(0,0,0,0.6)]">
-        <div className="flex items-center justify-between border-b border-[#23252a] bg-[#141516]/60 px-4 py-2 text-xs text-[#8a8f98]">
+      <div className="overflow-hidden rounded-[12px] border border-linear-hairline bg-linear-surface-1 shadow-[0_8px_32px_rgba(0,0,0,0.6)]">
+        <div className="flex items-center justify-between border-b border-linear-hairline bg-linear-surface-2/60 px-4 py-2 text-xs text-linear-ink-subtle">
           <span className="flex items-center gap-1.5 font-medium">
-            <FileCode className="h-3.5 w-3.5 text-[#5e6ad2]" />
+            <FileCode className="h-3.5 w-3.5 text-linear-primary" />
             Markdown / MDX 源码编辑
           </span>
-          <span className="text-[11px] text-[#62666d]">
+          <span className="text-[11px] text-linear-ink-tertiary">
             支持 GitHub Flavored Markdown 与 MDX 扩展语法
           </span>
         </div>
@@ -303,33 +323,39 @@ export function Editor({ path }: { path: string }) {
           value={content}
           onChange={(e) => setContent(e.target.value)}
           spellCheck={false}
-          className="h-[65vh] w-full resize-none bg-transparent p-5 font-mono text-xs leading-relaxed text-[#f7f8f8] placeholder:text-[#62666d] focus:outline-none selection:bg-[#5e6ad2]/40"
+          className="h-[65vh] w-full resize-none bg-transparent p-5 font-mono text-xs leading-relaxed text-linear-ink selection:bg-linear-primary/40 placeholder:text-linear-ink-tertiary focus:outline-none"
           placeholder="编写 Markdown 文档内容..."
         />
       </div>
 
       {/* Git History Modal / Panel */}
       {history && (
-        <Card className="border-[#23252a] bg-[#0f1011]">
+        <Card className="border-linear-hairline bg-linear-surface-1">
           <CardHeader className="flex flex-row items-center justify-between pb-3">
             <div>
-              <CardTitle className="text-sm font-semibold flex items-center gap-2 text-[#f7f8f8]">
-                <GitCommit className="h-4 w-4 text-[#828fff]" />
+              <CardTitle className="flex items-center gap-2 text-sm font-semibold text-linear-ink">
+                <GitCommit className="h-4 w-4 text-linear-primary-hover" />
                 Git 提交历史记录
               </CardTitle>
-              <CardDescription className="text-xs text-[#8a8f98]">
+              <CardDescription className="text-xs text-linear-ink-subtle">
                 每次发布或回滚均会自动记录为 Git 历史提交，点击可一键无损回滚。
               </CardDescription>
             </div>
-            <Button variant="ghost" size="icon-sm" onClick={() => setHistory(null)}>
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              onClick={() => setHistory(null)}
+            >
               <X className="h-4 w-4" />
             </Button>
           </CardHeader>
           <CardContent>
             {history.length === 0 ? (
-              <p className="text-xs text-[#8a8f98] py-4 text-center">暂无版本历史</p>
+              <p className="py-4 text-center text-xs text-linear-ink-subtle">
+                暂无版本历史
+              </p>
             ) : (
-              <div className="divide-y divide-[#23252a]/60">
+              <div className="divide-y divide-linear-hairline/60">
                 {history.map((h) => (
                   <div
                     key={h.rev}
@@ -337,9 +363,11 @@ export function Editor({ path }: { path: string }) {
                   >
                     <div className="flex items-center gap-2.5">
                       <Kbd>{h.rev}</Kbd>
-                      <span className="text-xs text-[#f7f8f8]">{h.message}</span>
+                      <span className="text-xs text-linear-ink">
+                        {h.message}
+                      </span>
                     </div>
-                    <div className="flex items-center gap-4 text-[#8a8f98]">
+                    <div className="flex items-center gap-4 text-linear-ink-subtle">
                       <span>{h.date}</span>
                       <Button
                         variant="secondary"
@@ -347,7 +375,7 @@ export function Editor({ path }: { path: string }) {
                         className="h-7 text-xs"
                         onClick={() => doRevert(h.rev)}
                       >
-                        <RotateCcw className="h-3 w-3 mr-1" />
+                        <RotateCcw className="mr-1 h-3 w-3" />
                         回滚至此版本
                       </Button>
                     </div>

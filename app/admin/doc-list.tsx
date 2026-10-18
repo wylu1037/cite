@@ -32,7 +32,8 @@ function fmt(ts: number) {
 function pageUrl(p: string) {
   const noExt = p.replace(/\.(mdx?|md)$/i, '');
   if (noExt === 'index') return '/docs';
-  if (noExt.endsWith('/index')) return `/docs/${noExt.slice(0, -'/index'.length)}`;
+  if (noExt.endsWith('/index'))
+    return `/docs/${noExt.slice(0, -'/index'.length)}`;
   return `/docs/${noExt}`;
 }
 
@@ -44,7 +45,8 @@ export function DocList({ docs }: { docs: DocEntry[] }) {
   const [filter, setFilter] = useState<'all' | 'published' | 'draft'>('all');
 
   async function remove(p: string) {
-    if (!confirm(`确认删除 ${p}？（版本历史保留在 Git 中，可随时回滚恢复）`)) return;
+    if (!confirm(`确认删除 ${p}？（版本历史保留在 Git 中，可随时回滚恢复）`))
+      return;
     setBusy(p);
     await fetch('/api/admin/delete', {
       method: 'POST',
@@ -69,13 +71,22 @@ export function DocList({ docs }: { docs: DocEntry[] }) {
       const json = (await res.json()) as {
         ok?: boolean;
         error?: string;
-        stats?: { docs: number; updated: number; skipped: number; deleted: number; chunks: number; errors?: string[] };
+        stats?: {
+          docs: number;
+          updated: number;
+          skipped: number;
+          deleted: number;
+          chunks: number;
+          errors?: string[];
+        };
       };
       if (json.ok && json.stats) {
         const s = json.stats;
         setMsg(
           `索引重建完成：文档 ${s.docs} 篇（更新 ${s.updated} / 跳过 ${s.skipped} / 清理 ${s.deleted}），切分 ${s.chunks} 个向量分块` +
-            (s.errors?.length ? `，失败 ${s.errors.length}：${s.errors[0]}` : ''),
+            (s.errors?.length
+              ? `，失败 ${s.errors.length}：${s.errors[0]}`
+              : '')
         );
       } else {
         setMsg(`索引失败：${json.error ?? '未知错误'}`);
@@ -101,7 +112,9 @@ export function DocList({ docs }: { docs: DocEntry[] }) {
       if (filter === 'draft' && !d.hasDraft) return false;
       if (search.trim()) {
         const q = search.toLowerCase();
-        return d.title.toLowerCase().includes(q) || d.path.toLowerCase().includes(q);
+        return (
+          d.title.toLowerCase().includes(q) || d.path.toLowerCase().includes(q)
+        );
       }
       return true;
     });
@@ -110,16 +123,19 @@ export function DocList({ docs }: { docs: DocEntry[] }) {
   return (
     <div className="space-y-6">
       {/* Top Banner / Actions */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-[#23252a] pb-6">
+      <div className="flex flex-col gap-4 border-b border-linear-hairline pb-6 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <div className="flex items-center gap-2">
-            <h1 className="text-xl font-bold tracking-tight text-[#f7f8f8]">文档管理</h1>
-            <Badge variant="outline" className="text-[11px] font-mono">
+            <h1 className="text-xl font-bold tracking-tight text-linear-ink">
+              文档管理
+            </h1>
+            <Badge variant="outline" className="font-mono text-[11px]">
               {docs.length} 篇文档
             </Badge>
           </div>
-          <p className="mt-1 text-xs text-[#8a8f98]">
-            管理知识库 Markdown/MDX 文档，支持实时编辑、双态草稿发布、Git 历史追溯与向量重建。
+          <p className="mt-1 text-xs text-linear-ink-subtle">
+            管理知识库 Markdown/MDX 文档，支持实时编辑、双态草稿发布、Git
+            历史追溯与向量重建。
           </p>
         </div>
 
@@ -136,10 +152,17 @@ export function DocList({ docs }: { docs: DocEntry[] }) {
             onClick={reindex}
             disabled={busy === '__reindex__'}
           >
-            <RefreshCw className={`h-3.5 w-3.5 text-[#828fff] ${busy === '__reindex__' ? 'animate-spin' : ''}`} />
+            <RefreshCw
+              className={`h-3.5 w-3.5 text-linear-primary-hover ${busy === '__reindex__' ? 'animate-spin' : ''}`}
+            />
             {busy === '__reindex__' ? '重建中…' : '重建向量索引'}
           </Button>
-          <Button variant="ghost" size="sm" onClick={logout} title="退出当前登录状态">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={logout}
+            title="退出当前登录状态"
+          >
             <LogOut className="h-3.5 w-3.5" />
             退出
           </Button>
@@ -148,8 +171,8 @@ export function DocList({ docs }: { docs: DocEntry[] }) {
 
       {/* Index Status Message */}
       {msg && (
-        <div className="flex items-center gap-2.5 rounded-[8px] border border-[#5e6ad2]/30 bg-[#5e6ad2]/10 p-3 text-xs text-[#d0d6e0]">
-          <CheckCircle2 className="h-4 w-4 text-[#828fff] shrink-0" />
+        <div className="flex items-center gap-2.5 rounded-[8px] border border-linear-primary/30 bg-linear-primary/10 p-3 text-xs text-linear-ink-muted">
+          <CheckCircle2 className="h-4 w-4 shrink-0 text-linear-primary-hover" />
           <span>{msg}</span>
         </div>
       )}
@@ -158,23 +181,23 @@ export function DocList({ docs }: { docs: DocEntry[] }) {
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         {/* Search */}
         <div className="relative w-full sm:w-72">
-          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-[#62666d]" />
+          <Search className="absolute top-2.5 left-2.5 h-4 w-4 text-linear-ink-tertiary" />
           <Input
             placeholder="搜索文档标题或路径..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="pl-8 text-xs h-9 bg-[#0f1011]"
+            className="h-9 bg-linear-surface-1 pl-8 text-xs"
           />
         </div>
 
         {/* Filter Tabs */}
-        <div className="flex items-center rounded-[8px] border border-[#23252a] bg-[#0f1011] p-0.5 text-xs">
+        <div className="flex items-center rounded-[8px] border border-linear-hairline bg-linear-surface-1 p-0.5 text-xs">
           <button
             onClick={() => setFilter('all')}
             className={`rounded-[6px] px-3 py-1 transition-colors ${
               filter === 'all'
-                ? 'bg-[#18191a] text-[#f7f8f8] font-medium'
-                : 'text-[#8a8f98] hover:text-[#f7f8f8]'
+                ? 'bg-linear-surface-3 font-medium text-linear-ink'
+                : 'text-linear-ink-subtle hover:text-linear-ink'
             }`}
           >
             全部 ({counts.all})
@@ -183,8 +206,8 @@ export function DocList({ docs }: { docs: DocEntry[] }) {
             onClick={() => setFilter('published')}
             className={`rounded-[6px] px-3 py-1 transition-colors ${
               filter === 'published'
-                ? 'bg-[#18191a] text-[#f7f8f8] font-medium'
-                : 'text-[#8a8f98] hover:text-[#f7f8f8]'
+                ? 'bg-linear-surface-3 font-medium text-linear-ink'
+                : 'text-linear-ink-subtle hover:text-linear-ink'
             }`}
           >
             已发布 ({counts.published})
@@ -193,8 +216,8 @@ export function DocList({ docs }: { docs: DocEntry[] }) {
             onClick={() => setFilter('draft')}
             className={`rounded-[6px] px-3 py-1 transition-colors ${
               filter === 'draft'
-                ? 'bg-[#18191a] text-[#f7f8f8] font-medium'
-                : 'text-[#8a8f98] hover:text-[#f7f8f8]'
+                ? 'bg-linear-surface-3 font-medium text-linear-ink'
+                : 'text-linear-ink-subtle hover:text-linear-ink'
             }`}
           >
             草稿中 ({counts.draft})
@@ -203,34 +226,34 @@ export function DocList({ docs }: { docs: DocEntry[] }) {
       </div>
 
       {/* High-density Table */}
-      <div className="overflow-hidden rounded-[12px] border border-[#23252a] bg-[#0f1011] shadow-[0_4px_20px_rgba(0,0,0,0.5)]">
+      <div className="overflow-hidden rounded-[12px] border border-linear-hairline bg-linear-surface-1 shadow-[0_4px_20px_rgba(0,0,0,0.5)]">
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs text-[#d0d6e0]">
+          <table className="w-full text-left text-xs text-linear-ink-muted">
             <thead>
-              <tr className="border-b border-[#23252a] bg-[#141516]/80 text-[#8a8f98] font-medium">
-                <th className="py-2.5 px-4">标题</th>
-                <th className="py-2.5 px-4">文件路径</th>
-                <th className="py-2.5 px-4">状态</th>
-                <th className="py-2.5 px-4">更新时间</th>
-                <th className="py-2.5 px-4 text-right">操作</th>
+              <tr className="border-b border-linear-hairline bg-linear-surface-2/80 font-medium text-linear-ink-subtle">
+                <th className="px-4 py-2.5">标题</th>
+                <th className="px-4 py-2.5">文件路径</th>
+                <th className="px-4 py-2.5">状态</th>
+                <th className="px-4 py-2.5">更新时间</th>
+                <th className="px-4 py-2.5 text-right">操作</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#23252a]/60">
+            <tbody className="divide-y divide-linear-hairline/60">
               {filteredDocs.map((d) => (
                 <tr
                   key={d.path}
-                  className="transition-colors hover:bg-[#141516]/60 group"
+                  className="group transition-colors hover:bg-linear-surface-2/60"
                 >
-                  <td className="py-3 px-4 font-medium text-[#f7f8f8]">
+                  <td className="px-4 py-3 font-medium text-linear-ink">
                     <div className="flex items-center gap-2">
-                      <FileText className="h-3.5 w-3.5 text-[#8a8f98] group-hover:text-[#5e6ad2] transition-colors" />
+                      <FileText className="h-3.5 w-3.5 text-linear-ink-subtle transition-colors group-hover:text-linear-primary" />
                       <span>{d.title}</span>
                     </div>
                   </td>
-                  <td className="py-3 px-4 font-mono text-[11px] text-[#8a8f98]">
+                  <td className="px-4 py-3 font-mono text-[11px] text-linear-ink-subtle">
                     {d.path}
                   </td>
-                  <td className="py-3 px-4">
+                  <td className="px-4 py-3">
                     {d.hasDraft ? (
                       <Badge variant="warning" size="sm">
                         草稿待发布
@@ -245,24 +268,36 @@ export function DocList({ docs }: { docs: DocEntry[] }) {
                       </Badge>
                     )}
                   </td>
-                  <td className="py-3 px-4 text-[#8a8f98] whitespace-nowrap">
+                  <td className="px-4 py-3 whitespace-nowrap text-linear-ink-subtle">
                     <span className="flex items-center gap-1.5">
-                      <Clock className="h-3 w-3 text-[#62666d]" />
+                      <Clock className="h-3 w-3 text-linear-ink-tertiary" />
                       {fmt(d.updatedAt)}
                     </span>
                   </td>
-                  <td className="py-3 px-4 text-right whitespace-nowrap">
+                  <td className="px-4 py-3 text-right whitespace-nowrap">
                     <div className="flex items-center justify-end gap-1">
                       <Link href={`/admin/edit/${d.path}`}>
-                        <Button variant="ghost" size="sm" className="h-7 px-2 text-xs">
-                          <Edit3 className="h-3 w-3 mr-1" />
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-7 px-2 text-xs"
+                        >
+                          <Edit3 className="mr-1 h-3 w-3" />
                           编辑
                         </Button>
                       </Link>
                       {d.published && (
-                        <a href={pageUrl(d.path)} target="_blank" rel="noreferrer">
-                          <Button variant="ghost" size="sm" className="h-7 px-2 text-xs">
-                            <ExternalLink className="h-3 w-3 mr-1" />
+                        <a
+                          href={pageUrl(d.path)}
+                          target="_blank"
+                          rel="noreferrer"
+                        >
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-7 px-2 text-xs"
+                          >
+                            <ExternalLink className="mr-1 h-3 w-3" />
                             预览
                           </Button>
                         </a>
@@ -274,7 +309,7 @@ export function DocList({ docs }: { docs: DocEntry[] }) {
                         disabled={busy === d.path}
                         onClick={() => remove(d.path)}
                       >
-                        <Trash2 className="h-3 w-3 mr-1" />
+                        <Trash2 className="mr-1 h-3 w-3" />
                         删除
                       </Button>
                     </div>
@@ -283,13 +318,20 @@ export function DocList({ docs }: { docs: DocEntry[] }) {
               ))}
               {filteredDocs.length === 0 && (
                 <tr>
-                  <td colSpan={5} className="py-12 text-center text-[#8a8f98]">
-                    <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-[#141516] border border-[#23252a] mb-2">
-                      <AlertCircle className="h-5 w-5 text-[#62666d]" />
+                  <td
+                    colSpan={5}
+                    className="py-12 text-center text-linear-ink-subtle"
+                  >
+                    <div className="mx-auto mb-2 flex h-10 w-10 items-center justify-center rounded-full border border-linear-hairline bg-linear-surface-2">
+                      <AlertCircle className="h-5 w-5 text-linear-ink-tertiary" />
                     </div>
-                    <p className="text-sm font-medium text-[#d0d6e0]">未找到匹配的文档</p>
-                    <p className="text-xs text-[#62666d] mt-1">
-                      {search ? '请尝试更换搜索关键字' : '点击右上角「新建文档」创建您的第一篇知识库内容'}
+                    <p className="text-sm font-medium text-linear-ink-muted">
+                      未找到匹配的文档
+                    </p>
+                    <p className="mt-1 text-xs text-linear-ink-tertiary">
+                      {search
+                        ? '请尝试更换搜索关键字'
+                        : '点击右上角「新建文档」创建您的第一篇知识库内容'}
                     </p>
                   </td>
                 </tr>

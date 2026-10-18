@@ -26,20 +26,20 @@ export function SidebarFooter() {
   const currentTheme = mounted ? theme : 'system';
 
   return (
-    <div className="flex flex-col gap-2 pt-1 w-full">
+    <div className="flex w-full flex-col gap-2 pt-1">
       {/* 现代化分段主题切换器 */}
       <div
         role="group"
         aria-label="切换主题"
-        className="flex items-center w-full p-1 rounded-xl bg-zinc-100 dark:bg-[#141516] border border-zinc-200/80 dark:border-[#23252a] shadow-xs"
+        className="flex w-full items-center rounded-xl border border-zinc-200/80 bg-zinc-100 p-1 shadow-xs dark:border-linear-hairline dark:bg-linear-surface-2"
       >
         <button
           type="button"
           onClick={() => changeTheme('light')}
-          className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-xs font-medium transition-all duration-150 cursor-pointer ${
+          className={`flex flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-lg py-1.5 text-xs font-medium transition-all duration-150 ${
             currentTheme === 'light'
-              ? 'bg-white text-zinc-900 shadow-xs border border-zinc-200/60 font-semibold dark:bg-[#23252a] dark:text-[#f7f8f8] dark:border-zinc-700/50'
-              : 'text-zinc-500 hover:text-zinc-900 hover:bg-zinc-200/50 dark:text-[#8a8f98] dark:hover:text-[#f7f8f8] dark:hover:bg-[#18191a]/60'
+              ? 'border border-zinc-200/60 bg-white font-semibold text-zinc-900 shadow-xs dark:border-zinc-700/50 dark:bg-linear-hairline dark:text-linear-ink'
+              : 'text-zinc-500 hover:bg-zinc-200/50 hover:text-zinc-900 dark:text-linear-ink-subtle dark:hover:bg-linear-surface-3/60 dark:hover:text-linear-ink'
           }`}
           title="浅色模式"
         >
@@ -50,10 +50,10 @@ export function SidebarFooter() {
         <button
           type="button"
           onClick={() => changeTheme('dark')}
-          className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-xs font-medium transition-all duration-150 cursor-pointer ${
+          className={`flex flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-lg py-1.5 text-xs font-medium transition-all duration-150 ${
             currentTheme === 'dark'
-              ? 'bg-white text-zinc-900 shadow-xs border border-zinc-200/60 font-semibold dark:bg-[#23252a] dark:text-[#f7f8f8] dark:border-zinc-700/50'
-              : 'text-zinc-500 hover:text-zinc-900 hover:bg-zinc-200/50 dark:text-[#8a8f98] dark:hover:text-[#f7f8f8] dark:hover:bg-[#18191a]/60'
+              ? 'border border-zinc-200/60 bg-white font-semibold text-zinc-900 shadow-xs dark:border-zinc-700/50 dark:bg-linear-hairline dark:text-linear-ink'
+              : 'text-zinc-500 hover:bg-zinc-200/50 hover:text-zinc-900 dark:text-linear-ink-subtle dark:hover:bg-linear-surface-3/60 dark:hover:text-linear-ink'
           }`}
           title="深色模式"
         >
@@ -64,10 +64,10 @@ export function SidebarFooter() {
         <button
           type="button"
           onClick={() => changeTheme('system')}
-          className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-xs font-medium transition-all duration-150 cursor-pointer ${
+          className={`flex flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-lg py-1.5 text-xs font-medium transition-all duration-150 ${
             currentTheme === 'system'
-              ? 'bg-white text-zinc-900 shadow-xs border border-zinc-200/60 font-semibold dark:bg-[#23252a] dark:text-[#f7f8f8] dark:border-zinc-700/50'
-              : 'text-zinc-500 hover:text-zinc-900 hover:bg-zinc-200/50 dark:text-[#8a8f98] dark:hover:text-[#f7f8f8] dark:hover:bg-[#18191a]/60'
+              ? 'border border-zinc-200/60 bg-white font-semibold text-zinc-900 shadow-xs dark:border-zinc-700/50 dark:bg-linear-hairline dark:text-linear-ink'
+              : 'text-zinc-500 hover:bg-zinc-200/50 hover:text-zinc-900 dark:text-linear-ink-subtle dark:hover:bg-linear-surface-3/60 dark:hover:text-linear-ink'
           }`}
           title="跟随系统"
         >
@@ -80,12 +80,14 @@ export function SidebarFooter() {
       <div className="flex items-center justify-between px-1 text-xs text-zinc-400 dark:text-zinc-500">
         <Link
           href="/admin"
-          className="inline-flex items-center gap-1.5 hover:text-zinc-800 dark:hover:text-zinc-300 transition-colors py-0.5"
+          className="inline-flex items-center gap-1.5 py-0.5 transition-colors hover:text-zinc-800 dark:hover:text-zinc-300"
         >
           <Settings className="size-3" />
           <span>管理后台</span>
         </Link>
-        <span className="text-[11px] text-zinc-400/80 dark:text-zinc-600">知识库系统</span>
+        <span className="text-[11px] text-zinc-400/80 dark:text-zinc-600">
+          知识库系统
+        </span>
       </div>
     </div>
   );

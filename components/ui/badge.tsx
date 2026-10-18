@@ -7,31 +7,38 @@ export const badgeVariants = cva(
   {
     variants: {
       variant: {
-        default: 'bg-[#141516] text-[#d0d6e0] border border-[#23252a]',
-        primary: 'bg-[#5e6ad2]/15 text-[#828fff] border border-[#5e6ad2]/30',
-        success: 'bg-[#27a644]/15 text-[#4ade80] border border-[#27a644]/30',
-        warning: 'bg-[#f5a623]/15 text-[#fbbf24] border border-[#f5a623]/30',
-        destructive: 'bg-[#e5484d]/15 text-[#ff6b6b] border border-[#e5484d]/30',
-        outline: 'border border-[#23252a] text-[#8a8f98]',
+        default:
+          'border border-linear-hairline bg-linear-surface-2 text-linear-ink-muted',
+        primary:
+          'border border-linear-primary/30 bg-linear-primary/15 text-linear-primary-hover',
+        success: 'border border-[#27a644]/30 bg-[#27a644]/15 text-[#4ade80]',
+        warning: 'border border-[#f5a623]/30 bg-[#f5a623]/15 text-[#fbbf24]',
+        destructive:
+          'border border-[#e5484d]/30 bg-[#e5484d]/15 text-[#ff6b6b]',
+        outline: 'border border-linear-hairline text-linear-ink-subtle',
       },
       size: {
-        default: 'px-2 py-0.5 text-xs rounded-full gap-1',
-        sm: 'px-1.5 py-0.2 text-[11px] rounded-[4px] gap-1',
+        default: 'gap-1 rounded-full px-2 py-0.5 text-xs',
+        sm: 'py-0.2 gap-1 rounded-[4px] px-1.5 text-[11px]',
       },
     },
     defaultVariants: {
       variant: 'default',
       size: 'default',
     },
-  },
+  }
 );
 
 export interface BadgeProps
-  extends React.HTMLAttributes<HTMLDivElement>,
+  extends
+    React.HTMLAttributes<HTMLDivElement>,
     VariantProps<typeof badgeVariants> {}
 
 export function Badge({ className, variant, size, ...props }: BadgeProps) {
   return (
-    <div className={cn(badgeVariants({ variant, size }), className)} {...props} />
+    <div
+      className={cn(badgeVariants({ variant, size }), className)}
+      {...props}
+    />
   );
 }

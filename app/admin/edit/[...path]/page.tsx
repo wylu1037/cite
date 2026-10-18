@@ -1,7 +1,9 @@
 import { requireAdmin } from '@/lib/admin/server';
 import { Editor } from './editor';
 
-export default async function EditPage(props: PageProps<'/admin/edit/[...path]'>) {
+export default async function EditPage(
+  props: PageProps<'/admin/edit/[...path]'>
+) {
   await requireAdmin();
   const { path: segments } = await props.params;
   const rel = segments.join('/');

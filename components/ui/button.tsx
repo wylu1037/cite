@@ -3,25 +3,25 @@ import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '@/lib/utils';
 
 export const buttonVariants = cva(
-  'inline-flex items-center justify-center font-medium transition-colors select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5e6ad2]/50 disabled:pointer-events-none disabled:opacity-50',
+  'inline-flex items-center justify-center font-medium transition-colors select-none focus-visible:ring-2 focus-visible:ring-linear-primary/50 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50',
   {
     variants: {
       variant: {
         primary:
-          'bg-[#5e6ad2] text-white hover:bg-[#828fff] active:bg-[#5e69d1] shadow-[0_1px_2px_rgba(0,0,0,0.2)] dark:shadow-[0_1px_2px_rgba(0,0,0,0.6)]',
+          'bg-linear-primary text-white shadow-[0_1px_2px_rgba(0,0,0,0.2)] hover:bg-linear-primary-hover active:bg-linear-primary-focus dark:shadow-[0_1px_2px_rgba(0,0,0,0.6)]',
         secondary:
-          'bg-zinc-100 dark:bg-[#0f1011] text-zinc-900 dark:text-[#f7f8f8] border border-zinc-200 dark:border-[#23252a] hover:bg-zinc-200 dark:hover:bg-[#141516] hover:border-zinc-300 dark:hover:border-[#34343a] active:bg-zinc-300 dark:active:bg-[#18191a]',
+          'border border-zinc-200 bg-zinc-100 text-zinc-900 hover:border-zinc-300 hover:bg-zinc-200 active:bg-zinc-300 dark:border-linear-hairline dark:bg-linear-surface-1 dark:text-linear-ink dark:hover:border-linear-hairline-strong dark:hover:bg-linear-surface-2 dark:active:bg-linear-surface-3',
         outline:
-          'border border-zinc-200 dark:border-[#23252a] text-zinc-700 dark:text-[#d0d6e0] hover:bg-zinc-100 dark:hover:bg-[#141516] hover:text-zinc-900 dark:hover:text-[#f7f8f8] active:bg-zinc-200 dark:active:bg-[#18191a]',
+          'border border-zinc-200 text-zinc-700 hover:bg-zinc-100 hover:text-zinc-900 active:bg-zinc-200 dark:border-linear-hairline dark:text-linear-ink-muted dark:hover:bg-linear-surface-2 dark:hover:text-linear-ink dark:active:bg-linear-surface-3',
         ghost:
-          'text-zinc-600 dark:text-[#8a8f98] hover:text-zinc-900 dark:hover:text-[#f7f8f8] hover:bg-zinc-100 dark:hover:bg-[#141516] active:bg-zinc-200 dark:active:bg-[#18191a]',
+          'text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900 active:bg-zinc-200 dark:text-linear-ink-subtle dark:hover:bg-linear-surface-2 dark:hover:text-linear-ink dark:active:bg-linear-surface-3',
         destructive:
-          'bg-red-500/10 dark:bg-[#e5484d]/15 text-red-600 dark:text-[#ff6b6b] border border-red-200 dark:border-[#e5484d]/30 hover:bg-red-500/20 dark:hover:bg-[#e5484d]/25 active:bg-red-500/30 dark:active:bg-[#e5484d]/35',
+          'border border-red-200 bg-red-500/10 text-red-600 hover:bg-red-500/20 active:bg-red-500/30 dark:border-[#e5484d]/30 dark:bg-[#e5484d]/15 dark:text-[#ff6b6b] dark:hover:bg-[#e5484d]/25 dark:active:bg-[#e5484d]/35',
       },
       size: {
-        default: 'h-9 px-3.5 text-sm rounded-[8px] gap-2',
-        sm: 'h-8 px-2.5 text-xs rounded-[6px] gap-1.5',
-        lg: 'h-10 px-5 text-sm rounded-[8px] gap-2.5',
+        default: 'h-9 gap-2 rounded-[8px] px-3.5 text-sm',
+        sm: 'h-8 gap-1.5 rounded-[6px] px-2.5 text-xs',
+        lg: 'h-10 gap-2.5 rounded-[8px] px-5 text-sm',
         icon: 'h-9 w-9 rounded-[8px]',
         'icon-sm': 'h-7 w-7 rounded-[6px]',
       },
@@ -30,11 +30,12 @@ export const buttonVariants = cva(
       variant: 'secondary',
       size: 'default',
     },
-  },
+  }
 );
 
 export interface ButtonProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement>,
+  extends
+    React.ButtonHTMLAttributes<HTMLButtonElement>,
     VariantProps<typeof buttonVariants> {}
 
 export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
@@ -46,6 +47,6 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         {...props}
       />
     );
-  },
+  }
 );
 Button.displayName = 'Button';

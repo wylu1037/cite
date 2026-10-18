@@ -4,7 +4,13 @@ import { useState, type FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from '@/components/ui/card';
 import { Lock } from 'lucide-react';
 
 export default function LoginPage() {
@@ -38,23 +44,25 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="flex flex-1 min-h-[calc(100vh-3.5rem)] items-center justify-center p-6 bg-[#010102]">
-      <Card className="w-full max-w-sm border-[#23252a] bg-[#0f1011] shadow-[0_12px_40px_rgba(0,0,0,0.8)]">
-        <CardHeader className="text-center pb-4">
-          <div className="mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-[8px] bg-[#5e6ad2]/15 text-[#828fff] border border-[#5e6ad2]/30">
+    <main className="flex min-h-[calc(100vh-3.5rem)] flex-1 items-center justify-center bg-linear-canvas p-6">
+      <Card className="w-full max-w-sm border-linear-hairline bg-linear-surface-1 shadow-[0_12px_40px_rgba(0,0,0,0.8)]">
+        <CardHeader className="pb-4 text-center">
+          <div className="mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-[8px] border border-linear-primary/30 bg-linear-primary/15 text-linear-primary-hover">
             <Lock className="h-5 w-5" />
           </div>
-          <CardTitle className="text-lg font-semibold tracking-tight text-[#f7f8f8]">
+          <CardTitle className="text-lg font-semibold tracking-tight text-linear-ink">
             知识库控制台登录
           </CardTitle>
-          <CardDescription className="text-xs text-[#8a8f98]">
+          <CardDescription className="text-xs text-linear-ink-subtle">
             输入管理员账号密码以进入后台
           </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={submit} className="space-y-4">
             <div className="space-y-1.5">
-              <label className="text-xs font-medium text-[#d0d6e0]">账号</label>
+              <label className="text-xs font-medium text-linear-ink-muted">
+                账号
+              </label>
               <Input
                 value={user}
                 onChange={(e) => setUser(e.target.value)}
@@ -64,7 +72,9 @@ export default function LoginPage() {
               />
             </div>
             <div className="space-y-1.5">
-              <label className="text-xs font-medium text-[#d0d6e0]">密码</label>
+              <label className="text-xs font-medium text-linear-ink-muted">
+                密码
+              </label>
               <Input
                 type="password"
                 value={password}
@@ -75,7 +85,7 @@ export default function LoginPage() {
               />
             </div>
             {error && (
-              <p className="text-xs text-[#ff6b6b] bg-[#e5484d]/10 border border-[#e5484d]/25 rounded-[6px] p-2">
+              <p className="rounded-[6px] border border-[#e5484d]/25 bg-[#e5484d]/10 p-2 text-xs text-[#ff6b6b]">
                 {error}
               </p>
             )}
@@ -83,7 +93,7 @@ export default function LoginPage() {
               type="submit"
               variant="primary"
               disabled={busy}
-              className="w-full mt-2"
+              className="mt-2 w-full"
             >
               {busy ? '验证中…' : '登 录'}
             </Button>

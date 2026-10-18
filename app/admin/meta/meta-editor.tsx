@@ -5,7 +5,13 @@ import { useCallback, useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from '@/components/ui/card';
 import {
   ArrowLeft,
   Save,
@@ -21,7 +27,11 @@ import {
 } from 'lucide-react';
 
 type Entry = { name: string; type: 'page' | 'dir'; title: string };
-type MetaData = { dir: string; meta: Record<string, unknown>; entries: Entry[] };
+type MetaData = {
+  dir: string;
+  meta: Record<string, unknown>;
+  entries: Entry[];
+};
 
 export function MetaEditor({ dirs }: { dirs: string[] }) {
   const [dir, setDir] = useState('');
@@ -37,7 +47,9 @@ export function MetaEditor({ dirs }: { dirs: string[] }) {
     const res = await fetch(`/api/admin/meta?dir=${encodeURIComponent(d)}`);
     const json = (await res.json()) as MetaData;
     setData(json);
-    setPages(Array.isArray(json.meta.pages) ? (json.meta.pages as string[]) : []);
+    setPages(
+      Array.isArray(json.meta.pages) ? (json.meta.pages as string[]) : []
+    );
     setTitle(typeof json.meta.title === 'string' ? json.meta.title : '');
     setIcon(typeof json.meta.icon === 'string' ? json.meta.icon : '');
   }, []);
@@ -85,19 +97,24 @@ export function MetaEditor({ dirs }: { dirs: string[] }) {
     }
   }
 
-  const titleOf = (name: string) => data?.entries.find((e) => e.name === name)?.title;
+  const titleOf = (name: string) =>
+    data?.entries.find((e) => e.name === name)?.title;
   const unlisted = (data?.entries ?? []).filter((e) => !pages.includes(e.name));
 
   return (
-    <main className="mx-auto w-full max-w-4xl flex-1 p-6 lg:p-8 space-y-6">
+    <main className="mx-auto w-full max-w-4xl flex-1 space-y-6 p-6 lg:p-8">
       {/* Header */}
-      <div className="flex flex-wrap items-center justify-between gap-4 border-b border-[#23252a] pb-6">
+      <div className="flex flex-wrap items-center justify-between gap-4 border-b border-linear-hairline pb-6">
         <div>
           <div className="flex items-center gap-2">
-            <h1 className="text-xl font-bold tracking-tight text-[#f7f8f8]">侧栏与目录配置</h1>
-            <Badge variant="outline" className="text-xs">meta.json</Badge>
+            <h1 className="text-xl font-bold tracking-tight text-linear-ink">
+              侧栏与目录配置
+            </h1>
+            <Badge variant="outline" className="text-xs">
+              meta.json
+            </Badge>
           </div>
-          <p className="mt-1 text-xs text-[#8a8f98]">
+          <p className="mt-1 text-xs text-linear-ink-subtle">
             配置前台文档侧栏的显示名称、Lucide 图标以及文章排列顺序。
           </p>
         </div>
@@ -105,7 +122,7 @@ export function MetaEditor({ dirs }: { dirs: string[] }) {
         <div className="flex items-center gap-2">
           <Link href="/admin">
             <Button variant="ghost" size="sm" className="h-8 text-xs">
-              <ArrowLeft className="h-3.5 w-3.5 mr-1" />
+              <ArrowLeft className="mr-1 h-3.5 w-3.5" />
               返回文档列表
             </Button>
           </Link>
@@ -116,30 +133,30 @@ export function MetaEditor({ dirs }: { dirs: string[] }) {
             disabled={busy || !data}
             className="h-8"
           >
-            <Save className="h-3.5 w-3.5 mr-1" />
+            <Save className="mr-1 h-3.5 w-3.5" />
             {busy ? '保存中…' : '保存配置'}
           </Button>
         </div>
       </div>
 
       {msg && (
-        <div className="flex items-center gap-2 rounded-[8px] border border-[#5e6ad2]/30 bg-[#5e6ad2]/10 p-3 text-xs text-[#d0d6e0]">
-          <CheckCircle2 className="h-4 w-4 text-[#828fff] shrink-0" />
+        <div className="flex items-center gap-2 rounded-[8px] border border-linear-primary/30 bg-linear-primary/10 p-3 text-xs text-linear-ink-muted">
+          <CheckCircle2 className="h-4 w-4 shrink-0 text-linear-primary-hover" />
           <span>{msg}</span>
         </div>
       )}
 
       {/* Directory Selector Card */}
-      <Card className="border-[#23252a] bg-[#0f1011]">
-        <CardContent className="p-4 space-y-2">
-          <label className="text-xs font-medium text-[#d0d6e0] flex items-center gap-1.5">
-            <FolderTree className="h-3.5 w-3.5 text-[#5e6ad2]" />
+      <Card className="border-linear-hairline bg-linear-surface-1">
+        <CardContent className="space-y-2 p-4">
+          <label className="flex items-center gap-1.5 text-xs font-medium text-linear-ink-muted">
+            <FolderTree className="h-3.5 w-3.5 text-linear-primary" />
             选择要配置的板块目录
           </label>
           <select
             value={dir}
             onChange={(e) => setDir(e.target.value)}
-            className="w-full rounded-[8px] border border-[#23252a] bg-[#141516] px-3 py-2 text-xs text-[#f7f8f8] focus:border-[#5e6ad2] focus:outline-none"
+            className="w-full rounded-[8px] border border-linear-hairline bg-linear-surface-2 px-3 py-2 text-xs text-linear-ink focus:border-linear-primary focus:outline-none"
           >
             {dirs.map((d) => (
               <option key={d} value={d}>
@@ -151,17 +168,21 @@ export function MetaEditor({ dirs }: { dirs: string[] }) {
       </Card>
 
       {/* Form Details Card */}
-      <Card className="border-[#23252a] bg-[#0f1011]">
+      <Card className="border-linear-hairline bg-linear-surface-1">
         <CardHeader className="pb-4">
-          <CardTitle className="text-sm font-semibold text-[#f7f8f8]">目录元属性</CardTitle>
-          <CardDescription className="text-xs text-[#8a8f98]">
+          <CardTitle className="text-sm font-semibold text-linear-ink">
+            目录元属性
+          </CardTitle>
+          <CardDescription className="text-xs text-linear-ink-subtle">
             设置此目录在前台侧栏显示的展示标题与图标
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div className="space-y-1.5">
-              <label className="text-xs font-medium text-[#d0d6e0]">展示标题</label>
+              <label className="text-xs font-medium text-linear-ink-muted">
+                展示标题
+              </label>
               <Input
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
@@ -170,14 +191,14 @@ export function MetaEditor({ dirs }: { dirs: string[] }) {
               />
             </div>
             <div className="space-y-1.5">
-              <label className="text-xs font-medium text-[#d0d6e0]">
+              <label className="text-xs font-medium text-linear-ink-muted">
                 Lucide 图标名（选填）
               </label>
               <Input
                 value={icon}
                 onChange={(e) => setIcon(e.target.value)}
                 placeholder="例如：Rocket, BookOpen, Code, Server"
-                className="text-xs font-mono"
+                className="font-mono text-xs"
               />
             </div>
           </div>
@@ -185,15 +206,15 @@ export function MetaEditor({ dirs }: { dirs: string[] }) {
       </Card>
 
       {/* Pages Ordering Card */}
-      <Card className="border-[#23252a] bg-[#0f1011]">
+      <Card className="border-linear-hairline bg-linear-surface-1">
         <CardHeader className="pb-3">
           <div className="flex items-center justify-between">
             <div>
-              <CardTitle className="text-sm font-semibold flex items-center gap-2 text-[#f7f8f8]">
-                <Layers className="h-4 w-4 text-[#5e6ad2]" />
+              <CardTitle className="flex items-center gap-2 text-sm font-semibold text-linear-ink">
+                <Layers className="h-4 w-4 text-linear-primary" />
                 侧栏文章排序（已列出 {pages.length} 项）
               </CardTitle>
-              <CardDescription className="text-xs text-[#8a8f98]">
+              <CardDescription className="text-xs text-linear-ink-subtle">
                 按自上而下的顺序显示，可使用箭头调整顺序或从侧栏隐藏
               </CardDescription>
             </div>
@@ -201,24 +222,24 @@ export function MetaEditor({ dirs }: { dirs: string[] }) {
         </CardHeader>
         <CardContent className="space-y-4">
           {pages.length === 0 ? (
-            <div className="rounded-[8px] border border-dashed border-[#23252a] p-6 text-center text-xs text-[#8a8f98]">
+            <div className="rounded-[8px] border border-dashed border-linear-hairline p-6 text-center text-xs text-linear-ink-subtle">
               暂未指定显示顺序（未配置时默认按文件名排序）
             </div>
           ) : (
-            <div className="divide-y divide-[#23252a]/60 rounded-[8px] border border-[#23252a] bg-[#141516]/60">
+            <div className="divide-y divide-linear-hairline/60 rounded-[8px] border border-linear-hairline bg-linear-surface-2/60">
               {pages.map((p, i) => (
                 <div
                   key={p}
-                  className="flex items-center justify-between px-3 py-2 text-xs transition-colors hover:bg-[#141516]"
+                  className="flex items-center justify-between px-3 py-2 text-xs transition-colors hover:bg-linear-surface-2"
                 >
                   <div className="flex items-center gap-2.5">
-                    <span className="font-mono text-[11px] text-[#62666d] w-5">
+                    <span className="w-5 font-mono text-[11px] text-linear-ink-tertiary">
                       {(i + 1).toString().padStart(2, '0')}
                     </span>
-                    <span className="font-medium text-[#f7f8f8]">
+                    <span className="font-medium text-linear-ink">
                       {titleOf(p) ?? p}
                     </span>
-                    <span className="font-mono text-[10px] text-[#8a8f98]">
+                    <span className="font-mono text-[10px] text-linear-ink-subtle">
                       ({p})
                     </span>
                   </div>
@@ -245,7 +266,7 @@ export function MetaEditor({ dirs }: { dirs: string[] }) {
                     <Button
                       variant="ghost"
                       size="icon-sm"
-                      className="text-[#8a8f98] hover:text-[#ff6b6b]"
+                      className="text-linear-ink-subtle hover:text-[#ff6b6b]"
                       onClick={() => removeAt(i)}
                       title="从侧栏移除"
                     >
@@ -260,7 +281,7 @@ export function MetaEditor({ dirs }: { dirs: string[] }) {
           {/* Unlisted documents to add */}
           {unlisted.length > 0 && (
             <div className="pt-2">
-              <label className="text-xs font-medium text-[#8a8f98] block mb-2">
+              <label className="mb-2 block text-xs font-medium text-linear-ink-subtle">
                 可添加到侧栏的文章或子目录：
               </label>
               <div className="flex flex-wrap gap-2">
@@ -269,11 +290,11 @@ export function MetaEditor({ dirs }: { dirs: string[] }) {
                     key={e.name}
                     type="button"
                     onClick={() => add(e.name)}
-                    className="flex items-center gap-1 rounded-[6px] border border-[#23252a] bg-[#141516] px-2.5 py-1 text-xs text-[#d0d6e0] hover:border-[#5e6ad2] hover:text-[#f7f8f8] transition-colors"
+                    className="flex items-center gap-1 rounded-[6px] border border-linear-hairline bg-linear-surface-2 px-2.5 py-1 text-xs text-linear-ink-muted transition-colors hover:border-linear-primary hover:text-linear-ink"
                   >
-                    <Plus className="h-3 w-3 text-[#5e6ad2]" />
+                    <Plus className="h-3 w-3 text-linear-primary" />
                     <span>{e.title || e.name}</span>
-                    <span className="font-mono text-[10px] text-[#62666d]">
+                    <span className="font-mono text-[10px] text-linear-ink-tertiary">
                       ({e.name})
                     </span>
                   </button>
