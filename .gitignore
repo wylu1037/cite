@@ -39,3 +39,5 @@ content/docs/(dev)
 
 # Prisma 生成的 client
 /lib/generated/
+
+/.pi
