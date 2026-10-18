@@ -11,7 +11,10 @@ const TYPES: Record<string, string> = {
   '.avif': 'image/avif',
 };
 
-export async function GET(_req: Request, { params }: RouteContext<'/api/media/[...path]'>) {
+export async function GET(
+  _req: Request,
+  { params }: RouteContext<'/api/media/[...path]'>
+) {
   const { path: segments } = await params;
   const name = segments.join('/');
   try {

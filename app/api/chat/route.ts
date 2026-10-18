@@ -5,11 +5,17 @@ import { embedOne } from '@/lib/rag/embedding';
 export const maxDuration = 120;
 
 type ChatMessage = { role: 'user' | 'assistant'; content: string };
-type SourceRef = { title: string; url: string; heading: string; content: string };
+type SourceRef = {
+  title: string;
+  url: string;
+  heading: string;
+  content: string;
+};
 
 const TOP_K = 6;
 
-const vecLiteral = (v: number[]) => `[${v.map((x) => (Number.isFinite(x) ? x.toFixed(6) : '0')).join(',')}]`;
+const vecLiteral = (v: number[]) =>
+  `[${v.map((x) => (Number.isFinite(x) ? x.toFixed(6) : '0')).join(',')}]`;
 
 function sse(obj: unknown): string {
   return `data: ${JSON.stringify(obj)}\n\n`;
@@ -17,7 +23,10 @@ function sse(obj: unknown): string {
 
 function buildSystemPrompt(sources: SourceRef[]): string {
   const ctx = sources
-    .map((s, i) => `[${i + 1}] ${s.title}${s.heading ? `（${s.heading}）` : ''} ${s.url}\n${s.content}`)
+    .map(
+      (s, i) =>
+        `[${i + 1}] ${s.title}${s.heading ? `（${s.heading}）` : ''} ${s.url}\n${s.content}`
+    )
     .join('\n\n');
   return `你是公司内部知识库的问答助手，只依据下面「资料」中的内容回答用户问题：
 - 引用资料时在句末标注编号，如 [1]；引用多条写作 [1][2]
@@ -48,12 +57,18 @@ async function retrieve(question: string): Promise<SourceRef[]> {
 }
 
 export async function POST(request: Request) {
-  const body = (await request.json().catch(() => null)) as { messages?: ChatMessage[] } | null;
+  const body = (await request.json().catch(() => null)) as {
+    messages?: ChatMessage[];
+  } | null;
   const messages = (body?.messages ?? [])
     .filter((m) => m && typeof m.content === 'string' && m.content.trim())
     .slice(-8);
-  const question = [...messages].reverse().find((m) => m.role === 'user')?.content.trim();
-  if (!question) return NextResponse.json({ error: '缺少问题' }, { status: 400 });
+  const question = [...messages]
+    .reverse()
+    .find((m) => m.role === 'user')
+    ?.content.trim();
+  if (!question)
+    return NextResponse.json({ error: '缺少问题' }, { status: 400 });
 
   let sources: SourceRef[] = [];
   try {
@@ -62,7 +77,8 @@ export async function POST(request: Request) {
     console.error('[chat] 检索失败，降级为直答：', e);
   }
 
-  const apiKey = process.env.OPENAI_API_KEY || process.env.DEEPSEEK_API_KEY || '';
+  const apiKey =
+    process.env.OPENAI_API_KEY || process.env.DEEPSEEK_API_KEY || '';
   if (!apiKey) {
     return NextResponse.json({
       mode: 'retrieval',
@@ -71,17 +87,30 @@ export async function POST(request: Request) {
     });
   }
 
-  const base = (process.env.OPENAI_API_BASE || process.env.DEEPSEEK_BASE_URL || 'https://api.deepseek.com').replace(/\/+$/, '');
+  const base = (
+    process.env.OPENAI_API_BASE ||
+    process.env.DEEPSEEK_BASE_URL ||
+    'https://api.deepseek.com'
+  ).replace(/\/+$/, '');
   let upstream: Response;
   try {
     upstream = await fetch(`${base}/chat/completions`, {
       method: 'POST',
-      headers: { 'content-type': 'application/json', authorization: `Bearer ${apiKey}` },
+      headers: {
+        'content-type': 'application/json',
+        authorization: `Bearer ${apiKey}`,
+      },
       body: JSON.stringify({
-        model: process.env.LLM_MODEL_NAME || process.env.DEEPSEEK_MODEL || 'deepseek-flash',
+        model:
+          process.env.LLM_MODEL_NAME ||
+          process.env.DEEPSEEK_MODEL ||
+          'deepseek-flash',
         max_tokens: Number(process.env.LLM_MAX_TOKENS || 2048),
         stream: true,
-        messages: [{ role: 'system', content: buildSystemPrompt(sources) }, ...messages],
+        messages: [
+          { role: 'system', content: buildSystemPrompt(sources) },
+          ...messages,
+        ],
       }),
       signal: AbortSignal.timeout(120_000),
     });
@@ -121,15 +150,27 @@ export async function POST(request: Request) {
             const payload = t.slice(5).trim();
             if (payload === '[DONE]') continue;
             try {
-              const j = JSON.parse(payload) as { choices?: { delta?: { content?: string } }[] };
+              const j = JSON.parse(payload) as {
+                choices?: { delta?: { content?: string } }[];
+              };
               const delta = j.choices?.[0]?.delta?.content;
-              if (delta) controller.enqueue(enc.encode(sse({ type: 'delta', text: delta })));
+              if (delta)
+                controller.enqueue(
+                  enc.encode(sse({ type: 'delta', text: delta }))
+                );
             } catch {}
           }
         }
         controller.enqueue(enc.encode(sse({ type: 'done' })));
       } catch (e) {
-        controller.enqueue(enc.encode(sse({ type: 'error', message: e instanceof Error ? e.message : '流式传输中断' })));
+        controller.enqueue(
+          enc.encode(
+            sse({
+              type: 'error',
+              message: e instanceof Error ? e.message : '流式传输中断',
+            })
+          )
+        );
       } finally {
         controller.close();
       }
@@ -140,6 +181,9 @@ export async function POST(request: Request) {
   });
 
   return new Response(stream, {
-    headers: { 'content-type': 'text/event-stream; charset=utf-8', 'cache-control': 'no-store' },
+    headers: {
+      'content-type': 'text/event-stream; charset=utf-8',
+      'cache-control': 'no-store',
+    },
   });
 }

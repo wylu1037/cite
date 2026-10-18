@@ -11,13 +11,16 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 ## Git Branch & Commit Message Conventions
 
 ### 1. Default Primary Branch
+
 - The primary branch for this repository is `main`.
 - All feature/fix branches should branch off and merge into `main`.
 
 ### 2. Conventional Commits in English
+
 All Git commit messages MUST follow the [Conventional Commits specification](https://www.conventionalcommits.org/) and be written in **English**.
 
 Format:
+
 ```
 <type>(<optional scope>): <description>
 
@@ -27,6 +30,7 @@ Format:
 ```
 
 #### Allowed Types:
+
 - `feat`: A new feature
 - `fix`: A bug fix
 - `docs`: Documentation changes
@@ -40,12 +44,13 @@ Format:
 - `revert`: Reverting a previous commit
 
 #### Rules:
+
 - The description must be in English.
 - Use imperative, present tense: "add" not "added", "fix" not "fixed".
 - Do not capitalize the first letter of the subject.
 - No trailing period (`.`) at the end of the subject.
 
 ### 3. Commit Execution Policy
+
 - The assistant is **STRICTLY FORBIDDEN** from running `git commit` automatically without explicit user instruction.
 - The assistant must only provide/recommend the Git Conventional Commit message and wait for user confirmation or manual execution.
-

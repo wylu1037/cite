@@ -74,7 +74,11 @@ export function chunkDoc(raw: string, fallbackTitle = ''): DocChunk[] {
   for (const s of sections) {
     for (const part of splitLong(s.lines.join('\n').trim())) {
       if (part.trim().length < 8) continue;
-      out.push({ ord: ord++, heading: s.heading || fallbackTitle, content: part });
+      out.push({
+        ord: ord++,
+        heading: s.heading || fallbackTitle,
+        content: part,
+      });
     }
   }
   return out;

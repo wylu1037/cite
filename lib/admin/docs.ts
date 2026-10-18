@@ -1,6 +1,14 @@
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
-import { mkdir, readFile, writeFile, rm, stat, readdir, rename } from 'node:fs/promises';
+import {
+  mkdir,
+  readFile,
+  writeFile,
+  rm,
+  stat,
+  readdir,
+  rename,
+} from 'node:fs/promises';
 import path from 'node:path';
 import { contentDir, invalidateDoc } from '@/lib/source';
 
@@ -20,7 +28,8 @@ function safeRel(rel: string): string {
   if (!norm || segs.some((s) => !s || s === '..' || s.startsWith('.'))) {
     throw new AdminError('非法路径');
   }
-  if (!/\.(md|mdx)$/i.test(norm)) throw new AdminError('只支持 .md / .mdx 文件');
+  if (!/\.(md|mdx)$/i.test(norm))
+    throw new AdminError('只支持 .md / .mdx 文件');
   return norm;
 }
 
@@ -69,7 +78,9 @@ export type DocEntry = {
 export async function listDocs(): Promise<DocEntry[]> {
   const [docs, drafts] = await Promise.all([walk(docsDir), walk(draftsDir)]);
   const draftSet = new Set(drafts);
-  const all = Array.from(new Set([...docs, ...drafts])).sort((a, b) => a.localeCompare(b, 'zh'));
+  const all = Array.from(new Set([...docs, ...drafts])).sort((a, b) =>
+    a.localeCompare(b, 'zh')
+  );
   const out: DocEntry[] = [];
   for (const r of all) {
     const published = docs.includes(r);
@@ -105,7 +116,10 @@ export async function saveDraft(rel: string, content: string) {
 // ---------- git 版本（以 contentRoot 为工作目录，自动发现所属仓库） ----------
 
 async function git(args: string[]): Promise<string> {
-  const { stdout } = await exec('git', args, { cwd: contentRoot, maxBuffer: 10 * 1024 * 1024 });
+  const { stdout } = await exec('git', args, {
+    cwd: contentRoot,
+    maxBuffer: 10 * 1024 * 1024,
+  });
   return stdout.trim();
 }
 
@@ -117,7 +131,12 @@ async function ensureRepo() {
     await git(['config', 'user.name', 'kb-admin']).catch(() => {});
     await git(['config', 'user.email', 'kb-admin@local']).catch(() => {});
     await git(['add', '-A']).catch(() => {});
-    await git(['commit', '-m', 'chore(content): initialize content repository', '--allow-empty']).catch(() => {});
+    await git([
+      'commit',
+      '-m',
+      'chore(content): initialize content repository',
+      '--allow-empty',
+    ]).catch(() => {});
   }
 }
 
@@ -203,8 +222,12 @@ export async function revert(rel: string, rev: string) {
 
 // ---------- 图片 ----------
 
-export async function saveMedia(originalName: string, data: Buffer): Promise<string> {
-  const safe = originalName.replace(/[^a-zA-Z0-9._-]/g, '_').slice(-80) || 'file';
+export async function saveMedia(
+  originalName: string,
+  data: Buffer
+): Promise<string> {
+  const safe =
+    originalName.replace(/[^a-zA-Z0-9._-]/g, '_').slice(-80) || 'file';
   const name = `${Date.now()}-${safe}`;
   await mkdir(mediaDir, { recursive: true });
   await writeFile(path.join(mediaDir, name), data);

@@ -48,15 +48,17 @@ export default async function Page(props: PageProps<'/docs/[[...slug]]'>) {
           </Cards>
         );
       },
-    }),
+    })
   );
   const markdownUrl = getPageMarkdownUrl(page).url;
 
   return (
     <DocsPage toc={toc} full={page.data.frontmatter.full}>
       <DocsTitle>{page.data.title}</DocsTitle>
-      <DocsDescription className="mb-0">{page.data.description}</DocsDescription>
-      <div className="flex flex-row gap-2 items-center border-b pb-6">
+      <DocsDescription className="mb-0">
+        {page.data.description}
+      </DocsDescription>
+      <div className="flex flex-row items-center gap-2 border-b pb-6">
         <MarkdownCopyButton markdownUrl={markdownUrl} />
         <ViewOptionsPopover markdownUrl={markdownUrl} />
       </div>
@@ -65,8 +67,9 @@ export default async function Page(props: PageProps<'/docs/[[...slug]]'>) {
   );
 }
 
-
-export async function generateMetadata(props: PageProps<'/docs/[[...slug]]'>): Promise<Metadata> {
+export async function generateMetadata(
+  props: PageProps<'/docs/[[...slug]]'>
+): Promise<Metadata> {
   const docs = await getSource();
   const params = await props.params;
   const page = docs.getPage(params.slug);

@@ -9,7 +9,8 @@ import { createHash } from 'node:crypto';
  * 2. EMBEDDING_PROVIDER=dashscope|siliconflow → 内置预设
  * 3. 都没有 → mock（确定性伪向量，本地联调免费）
  */
-export type EmbeddingProvider = 'openai-compatible' | 'dashscope' | 'siliconflow' | 'mock';
+export type EmbeddingProvider =
+  'openai-compatible' | 'dashscope' | 'siliconflow' | 'mock';
 
 export type EmbeddingConfig = {
   provider: EmbeddingProvider;
@@ -35,9 +36,12 @@ const PRESETS = {
   },
 } as const;
 
-export function embeddingConfig(env: NodeJS.ProcessEnv = process.env): EmbeddingConfig {
+export function embeddingConfig(
+  env: NodeJS.ProcessEnv = process.env
+): EmbeddingConfig {
   const dimOf = (fallback: number) => Number(env.EMBEDDING_DIM || fallback);
-  const modelName = (fallback: string) => (env.EMBEDDING_MODEL_NAME || env.EMBEDDING_MODEL || fallback).trim();
+  const modelName = (fallback: string) =>
+    (env.EMBEDDING_MODEL_NAME || env.EMBEDDING_MODEL || fallback).trim();
   const apiKey = (env.EMBEDDING_API_KEY || '').trim();
 
   const url = (env.EMBEDDING_API_URL || '').trim();
@@ -64,11 +68,21 @@ export function embeddingConfig(env: NodeJS.ProcessEnv = process.env): Embedding
       batch: preset.batch,
     };
   }
-  return { provider: 'mock', url: '', model: 'mock', apiKey: '', dim: dimOf(1024), batch: 100 };
+  return {
+    provider: 'mock',
+    url: '',
+    model: 'mock',
+    apiKey: '',
+    dim: dimOf(1024),
+    batch: 100,
+  };
 }
 
 /** 批量向量化（自动按服务端批量上限切段） */
-export async function embedTexts(texts: string[], env: NodeJS.ProcessEnv = process.env): Promise<number[][]> {
+export async function embedTexts(
+  texts: string[],
+  env: NodeJS.ProcessEnv = process.env
+): Promise<number[][]> {
   const cfg = embeddingConfig(env);
   if (cfg.provider === 'mock') return texts.map((t) => mockVector(t, cfg.dim));
   const out: number[][] = [];
@@ -78,21 +92,36 @@ export async function embedTexts(texts: string[], env: NodeJS.ProcessEnv = proce
   return out;
 }
 
-export async function embedOne(text: string, env: NodeJS.ProcessEnv = process.env): Promise<number[]> {
+export async function embedOne(
+  text: string,
+  env: NodeJS.ProcessEnv = process.env
+): Promise<number[]> {
   const [v] = await embedTexts([text], env);
   return v;
 }
 
-async function embedBatch(cfg: EmbeddingConfig, input: string[]): Promise<number[][]> {
-  const headers: Record<string, string> = { 'content-type': 'application/json' };
+async function embedBatch(
+  cfg: EmbeddingConfig,
+  input: string[]
+): Promise<number[][]> {
+  const headers: Record<string, string> = {
+    'content-type': 'application/json',
+  };
   if (cfg.apiKey) headers.authorization = `Bearer ${cfg.apiKey}`;
   const body = JSON.stringify({ model: cfg.model, input });
 
   const call = async () => {
-    const res = await fetch(cfg.url, { method: 'POST', headers, body, signal: AbortSignal.timeout(60_000) });
+    const res = await fetch(cfg.url, {
+      method: 'POST',
+      headers,
+      body,
+      signal: AbortSignal.timeout(60_000),
+    });
     if (!res.ok) {
       const detail = await res.text().catch(() => '');
-      throw new Error(`embedding 服务返回 ${res.status}：${detail.slice(0, 200)}`);
+      throw new Error(
+        `embedding 服务返回 ${res.status}：${detail.slice(0, 200)}`
+      );
     }
     return (await res.json()) as { data?: { embedding?: number[] }[] };
   };
@@ -104,11 +133,14 @@ async function embedBatch(cfg: EmbeddingConfig, input: string[]): Promise<number
     json = await call(); // 网络抖动重试一次
   }
   const vecs = (json.data ?? []).map((d) => d.embedding ?? []);
-  if (vecs.length !== input.length) throw new Error(`embedding 数量不符：收到 ${vecs.length}，期望 ${input.length}`);
+  if (vecs.length !== input.length)
+    throw new Error(
+      `embedding 数量不符：收到 ${vecs.length}，期望 ${input.length}`
+    );
   for (const v of vecs) {
     if (v.length !== cfg.dim) {
       throw new Error(
-        `embedding 维度不符：${v.length} != ${cfg.dim}（检查 EMBEDDING_MODEL_NAME / EMBEDDING_DIM，需与迁移 SQL 的 vector(${cfg.dim}) 一致）`,
+        `embedding 维度不符：${v.length} != ${cfg.dim}（检查 EMBEDDING_MODEL_NAME / EMBEDDING_DIM，需与迁移 SQL 的 vector(${cfg.dim}) 一致）`
       );
     }
   }

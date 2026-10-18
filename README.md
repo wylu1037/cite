@@ -60,11 +60,11 @@ docker compose exec web node scripts/check-ai.mjs   # 核对 embedding 实际维
 
 ## AI 配置
 
-| 变量 | 说明 |
-| --- | --- |
-| `OPENAI_API_BASE` / `OPENAI_API_KEY` / `LLM_MODEL_NAME` | 内网 vLLM 网关（dsv4）。网关不校验 key 时填 `EMPTY` |
-| `EMBEDDING_API_URL` | **完整接口地址**，含 `/v1/embeddings`（Qwen3-Embedding-8B，原生 4096 维） |
-| `EMBEDDING_MODEL_NAME` / `EMBEDDING_DIM` | 模型名与输出维度，必须与数据库 `vector(N)` 一致 |
+| 变量                                                    | 说明                                                                      |
+| ------------------------------------------------------- | ------------------------------------------------------------------------- |
+| `OPENAI_API_BASE` / `OPENAI_API_KEY` / `LLM_MODEL_NAME` | 内网 vLLM 网关（dsv4）。网关不校验 key 时填 `EMPTY`                       |
+| `EMBEDDING_API_URL`                                     | **完整接口地址**，含 `/v1/embeddings`（Qwen3-Embedding-8B，原生 4096 维） |
+| `EMBEDDING_MODEL_NAME` / `EMBEDDING_DIM`                | 模型名与输出维度，必须与数据库 `vector(N)` 一致                           |
 
 - 不配 LLM：问答自动降级为「检索片段直出」；不配 embedding：用 mock 伪向量（仅联调，不要用于生产检索）
 - 4096 维超过 pgvector hnsw 索引对 `vector` 类型的 2000 维上限，当前规模用顺序扫描；日后若截断维度到 ≤2000 可补索引

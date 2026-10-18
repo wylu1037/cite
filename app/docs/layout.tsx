@@ -20,4 +20,3 @@ export default async function Layout({ children }: LayoutProps<'/docs'>) {
     </DocsLayout>
   );
 }
-

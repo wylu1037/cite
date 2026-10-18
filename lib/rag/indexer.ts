@@ -19,7 +19,8 @@ async function walk(dir: string, rel = ''): Promise<string[]> {
   const out: string[] = [];
   const entries = await readdir(dir, { withFileTypes: true }).catch(() => []);
   for (const e of entries) {
-    if (e.name.startsWith('.') || e.name === '(dev)' || e.name === 'meta.json') continue;
+    if (e.name.startsWith('.') || e.name === '(dev)' || e.name === 'meta.json')
+      continue;
     const r = rel ? `${rel}/${e.name}` : e.name;
     if (e.isDirectory()) out.push(...(await walk(path.join(dir, e.name), r)));
     else if (/\.(md|mdx)$/i.test(e.name)) out.push(r);
@@ -30,15 +31,24 @@ async function walk(dir: string, rel = ''): Promise<string[]> {
 function docUrl(rel: string): string {
   const noExt = rel.replace(/\.(md|mdx)$/i, '');
   if (noExt === 'index') return '/docs';
-  if (noExt.endsWith('/index')) return `/docs/${noExt.slice(0, -'/index'.length)}`;
+  if (noExt.endsWith('/index'))
+    return `/docs/${noExt.slice(0, -'/index'.length)}`;
   return `/docs/${noExt}`;
 }
 
-const vecLiteral = (v: number[]) => `[${v.map((x) => (Number.isFinite(x) ? x.toFixed(6) : '0')).join(',')}]`;
+const vecLiteral = (v: number[]) =>
+  `[${v.map((x) => (Number.isFinite(x) ? x.toFixed(6) : '0')).join(',')}]`;
 
 /** 全量重建：新增/变更的文档重切分重嵌入，磁盘上已删除的文档清理掉 */
 export async function reindexAll(): Promise<ReindexStats> {
-  const stats: ReindexStats = { docs: 0, updated: 0, skipped: 0, deleted: 0, chunks: 0, errors: [] };
+  const stats: ReindexStats = {
+    docs: 0,
+    updated: 0,
+    skipped: 0,
+    deleted: 0,
+    chunks: 0,
+    errors: [],
+  };
   const files = await walk(docsDir);
   const seen = new Set<string>();
 
@@ -58,14 +68,21 @@ export async function reindexAll(): Promise<ReindexStats> {
       const url = docUrl(rel);
       const docId = existing?.id ?? randomUUID();
       const chunks = chunkDoc(raw, title);
-      const vectors = await embedTexts(chunks.map((c) => `${c.heading}\n${c.content}`));
+      const vectors = await embedTexts(
+        chunks.map((c) => `${c.heading}\n${c.content}`)
+      );
 
       await prisma.$transaction(async (tx) => {
         if (existing) {
           await tx.chunk.deleteMany({ where: { docId } });
-          await tx.doc.update({ where: { id: docId }, data: { hash, title, url } });
+          await tx.doc.update({
+            where: { id: docId },
+            data: { hash, title, url },
+          });
         } else {
-          await tx.doc.create({ data: { id: docId, path: rel, hash, title, url } });
+          await tx.doc.create({
+            data: { id: docId, path: rel, hash, title, url },
+          });
         }
         for (let i = 0; i < chunks.length; i++) {
           await tx.$executeRaw`
@@ -77,11 +94,16 @@ export async function reindexAll(): Promise<ReindexStats> {
       stats.updated++;
       stats.chunks += chunks.length;
     } catch (e) {
-      stats.errors.push(`${rel}: ${e instanceof Error ? e.message : String(e)}`);
+      stats.errors.push(
+        `${rel}: ${e instanceof Error ? e.message : String(e)}`
+      );
     }
   }
 
-  const stale = await prisma.doc.findMany({ where: { path: { notIn: [...seen] } }, select: { id: true } });
+  const stale = await prisma.doc.findMany({
+    where: { path: { notIn: [...seen] } },
+    select: { id: true },
+  });
   for (const s of stale) {
     await prisma.chunk.deleteMany({ where: { docId: s.id } });
     await prisma.doc.delete({ where: { id: s.id } });
