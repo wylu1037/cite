@@ -1,26 +1,27 @@
 import type { Metadata } from 'next';
-import { RootProvider } from 'fumadocs-ui/provider/next';
-import { i18nProvider } from 'fumadocs-ui/i18n';
-import { translations } from '@/lib/layout.shared';
+import { headers } from 'next/headers';
 import './global.css';
-import { DevClient } from '@fumadocs/local-md/dev/react-client';
 
-export const metadata: Metadata = {
-  metadataBase: new URL(
-    process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'
-  ),
-};
+const metadataBase = (() => {
+  try {
+    return new URL(process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000');
+  } catch {
+    return new URL('http://localhost:3000');
+  }
+})();
 
-export default function Layout({ children }: LayoutProps<'/'>) {
+export const metadata: Metadata = { metadataBase };
+
+/**
+ * 根布局只负责 <html>/<body>：语言由 proxy 写入 x-cite-locale 头，
+ * 具体的 i18n Provider 在 app/[lang]/layout.tsx 与 app/admin/layout.tsx 里各自挂载。
+ */
+export default async function Layout({ children }: LayoutProps<'/'>) {
+  const lang = (await headers()).get('x-cite-locale') ?? 'zh';
+
   return (
-    <html lang="zh-CN" suppressHydrationWarning>
-      <body className="flex min-h-screen flex-col">
-        <RootProvider i18n={i18nProvider(translations)}>
-          <DevClient />
-          <style>{`::highlight(fd-search) { color: var(--color-fd-primary); text-decoration: underline; }`}</style>
-          {children}
-        </RootProvider>
-      </body>
+    <html lang={lang === 'en' ? 'en' : 'zh-CN'} suppressHydrationWarning>
+      <body className="flex min-h-screen flex-col">{children}</body>
     </html>
   );
 }

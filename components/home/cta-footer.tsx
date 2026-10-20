@@ -2,8 +2,10 @@ import Link from 'next/link';
 import { BookOpen, ShieldCheck, ArrowRight, Sparkles } from 'lucide-react';
 import { buttonVariants } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { brandOf } from '@/lib/shared';
 
-export function CtaFooter() {
+export function CtaFooter({ locale }: { locale: string }) {
+  const brand = brandOf(locale);
   return (
     <footer className="pb-8 md:pb-12">
       {/* Pre-footer Call to Action */}
@@ -51,9 +53,9 @@ export function CtaFooter() {
           {/* Brand & Subtitle */}
           <div className="space-y-3">
             <span className="text-sm font-semibold text-zinc-800 dark:text-linear-ink-muted">
-              部门知识库
+              {brand.name}
             </span>
-            <p>研发与产品知识协作资产库</p>
+            <p>{brand.tagline}</p>
             <div className="flex flex-wrap items-center gap-x-3 gap-y-1 font-mono text-xs">
               <span>Next.js 16</span>
               <span>Fumadocs</span>

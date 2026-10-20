@@ -148,7 +148,13 @@ function inline(text: string, sources?: Source[]): ReactNode[] {
   return out;
 }
 
-export function AskClient({ initialQuery }: { initialQuery?: string }) {
+export function AskClient({
+  initialQuery,
+  locale,
+}: {
+  initialQuery?: string;
+  locale: string;
+}) {
   const [messages, setMessages] = useState<Msg[]>([]);
   const [input, setInput] = useState(initialQuery ?? '');
   const [busy, setBusy] = useState(false);
@@ -185,6 +191,7 @@ export function AskClient({ initialQuery }: { initialQuery?: string }) {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify({
+          locale,
           messages: history.map(({ role, content }) => ({ role, content })),
         }),
       });
@@ -259,7 +266,7 @@ export function AskClient({ initialQuery }: { initialQuery?: string }) {
           <div className="max-w-xl space-y-3">
             <div className="inline-flex items-center gap-1.5 rounded-full border border-linear-primary/25 bg-linear-primary/10 px-3 py-1 text-xs font-medium text-linear-primary dark:text-linear-primary-hover">
               <Sparkles className="h-3.5 w-3.5" />
-              <span>Ask AI · 部门知识库智能问答</span>
+              <span>Ask AI · 出处智能问答</span>
             </div>
             <h1 className="text-2xl font-bold tracking-tight text-zinc-900 sm:text-4xl dark:text-linear-ink">
               有什么可以帮您查阅？

@@ -1,6 +1,7 @@
 import path from 'node:path';
 import { lucideIconsPlugin } from 'fumadocs-core/source/lucide-icons';
 import { docsContentRoute, docsImageRoute, docsRoute } from './shared';
+import { i18n } from './i18n';
 import { localMd } from '@fumadocs/local-md';
 import { dynamicLoader, llms } from 'fumadocs-core/source';
 
@@ -22,6 +23,7 @@ function createDocsBundle() {
 
   const loader = dynamicLoader(docs.dynamicSource(), {
     baseUrl: docsRoute,
+    i18n,
     plugins: [lucideIconsPlugin()],
   });
 

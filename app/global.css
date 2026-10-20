@@ -35,6 +35,79 @@ body:has([data-home-page]) #nd-nav > nav {
   border-bottom-width: 0;
 }
 
+/* The homepage top bar aligns with the max-w-6xl content column. */
+body:has([data-home-page]) #nd-nav {
+  --fd-layout-width: 72rem;
+}
+
+/* Top bars: one search-pill geometry shared by the home nav and docs sidebar. */
+[data-search-full] {
+  border-radius: 0.5rem;
+}
+
+.dark [data-search-full] {
+  border-color: var(--color-linear-hairline);
+  background-color: var(--color-linear-surface-1);
+  color: var(--color-linear-ink-subtle);
+}
+
+.dark [data-search-full]:hover {
+  background-color: var(--color-linear-surface-2);
+  color: var(--color-linear-ink);
+}
+
+.dark [data-search-full] kbd {
+  border-color: var(--color-linear-hairline-strong);
+  background-color: transparent;
+  color: var(--color-linear-ink-tertiary);
+}
+
+/* Top bars: Linear palette for active links, hover text and focus rings. */
+.dark #nd-nav {
+  --color-fd-primary: var(--color-linear-primary-hover);
+  --color-fd-accent-foreground: var(--color-linear-ink);
+  --color-fd-ring: var(--color-linear-primary-focus);
+}
+
+.dark #nd-nav > nav,
+.dark #nd-subnav {
+  border-color: var(--color-linear-hairline);
+}
+
+.dark #nd-nav [data-theme-toggle] {
+  border-color: var(--color-linear-hairline);
+  background-color: var(--color-linear-surface-1);
+}
+
+/* Mobile menus: comfortable touch targets and brand focus rings. */
+#nd-nav nav .lg\:hidden a,
+#nd-subnav a {
+  min-height: 2.75rem;
+  display: inline-flex;
+  align-items: center;
+}
+
+.dark #nd-subnav {
+  --color-fd-ring: var(--color-linear-primary-focus);
+}
+
+/* Theme switch: circular reveal from the clicked button (clip-path driven by
+   WAAPI in sidebar-footer.tsx). Scoped so the `d` hotkey keeps the default
+   crossfade. */
+html[data-theme-reveal]::view-transition-old(root),
+html[data-theme-reveal]::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
+html[data-theme-reveal]::view-transition-old(root) {
+  z-index: 0;
+}
+
+html[data-theme-reveal]::view-transition-new(root) {
+  z-index: 1;
+}
+
 html > body[data-scroll-locked] {
   margin-right: 0px !important;
   --removed-body-scroll-bar-size: 0px !important;

@@ -128,8 +128,8 @@ async function ensureRepo() {
     await git(['rev-parse', '--git-dir']);
   } catch {
     await git(['init', '-b', 'main']);
-    await git(['config', 'user.name', 'kb-admin']).catch(() => {});
-    await git(['config', 'user.email', 'kb-admin@local']).catch(() => {});
+    await git(['config', 'user.name', 'cite-admin']).catch(() => {});
+    await git(['config', 'user.email', 'cite-admin@local']).catch(() => {});
     await git(['add', '-A']).catch(() => {});
     await git([
       'commit',

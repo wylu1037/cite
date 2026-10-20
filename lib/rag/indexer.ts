@@ -28,12 +28,16 @@ async function walk(dir: string, rel = ''): Promise<string[]> {
   return out;
 }
 
+/** rel 形如 zh/getting-started/index.mdx：首段是语言目录 */
 function docUrl(rel: string): string {
   const noExt = rel.replace(/\.(md|mdx)$/i, '');
-  if (noExt === 'index') return '/docs';
-  if (noExt.endsWith('/index'))
-    return `/docs/${noExt.slice(0, -'/index'.length)}`;
-  return `/docs/${noExt}`;
+  const [lang, ...rest] = noExt.split('/');
+  const slug = rest.join('/');
+  const base = lang === 'zh' ? '/docs' : `/${lang}/docs`;
+  if (!slug || slug === 'index') return base;
+  if (slug.endsWith('/index'))
+    return `${base}/${slug.slice(0, -'/index'.length)}`;
+  return `${base}/${slug}`;
 }
 
 const vecLiteral = (v: number[]) =>

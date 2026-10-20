@@ -18,10 +18,14 @@ import { Card, Cards } from 'fumadocs-ui/components/card';
 import { findSiblings } from 'fumadocs-core/page-tree';
 import { getPageImageUrl, getPageMarkdownUrl } from '@/lib/shared';
 
-export default async function Page(props: PageProps<'/docs/[[...slug]]'>) {
-  const params = await props.params;
+type DocsPageParams = {
+  params: Promise<{ lang: string; slug?: string[] }>;
+};
+
+export default async function Page(props: DocsPageParams) {
+  const { lang, slug } = await props.params;
   const docs = await getSource();
-  const page = docs.getPage(params.slug);
+  const page = docs.getPage(slug, lang);
   if (!page) notFound();
 
   const { render } = await page.data.load();
@@ -32,7 +36,7 @@ export default async function Page(props: PageProps<'/docs/[[...slug]]'>) {
       DocsCategory({ url = page.url }: { url?: string }) {
         return (
           <Cards>
-            {findSiblings(docs.getPageTree(), url).map((item) => {
+            {findSiblings(docs.getPageTree(lang), url).map((item) => {
               if (item.type === 'separator') return;
               if (item.type === 'folder') {
                 if (!item.index) return;
@@ -68,11 +72,11 @@ export default async function Page(props: PageProps<'/docs/[[...slug]]'>) {
 }
 
 export async function generateMetadata(
-  props: PageProps<'/docs/[[...slug]]'>
+  props: DocsPageParams
 ): Promise<Metadata> {
   const docs = await getSource();
-  const params = await props.params;
-  const page = docs.getPage(params.slug);
+  const { lang, slug } = await props.params;
+  const page = docs.getPage(slug, lang);
   if (!page) notFound();
 
   return {

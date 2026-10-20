@@ -1,16 +1,26 @@
-# 部门知识库
+# Cite · 部门知识库
 
-fumadocs 文档站 + 极简后台 + 站内 Ask AI（向量检索 + 内网 LLM 带引用回答）。
+每句话都有出处 —— fumadocs 文档站 + 极简后台 + 站内 Ask AI（向量检索 + 内网 LLM 带引用回答）。
 
-- 前台 `/docs`：无登录（内网边界），中文全文搜索
+- 前台 `/docs`：无登录（内网边界），中文全文搜索；英文站在 `/en/docs`
 - 后台 `/admin`：账号登录，md 在线编辑 / 草稿发布 / 版本历史（git）/ 一键回滚 / 图片上传 / 侧栏配置
-- 问答 `/ask`：基于站内已发布文档的 RAG 问答，带引用来源
+- 问答 `/ask`（英文 `/en/ask`）：基于站内已发布文档的 RAG 问答，带引用来源
+
+## 双语（中文 / 英文）
+
+- 中文是默认语言，URL 无前缀；英文加 `/en`（例：`/docs/quickstart` ↔ `/en/docs/quickstart`）
+- 内容按语言分目录：`content/docs/zh/**`、`content/docs/en/**`；两侧的 `meta.json` 各自维护侧栏
+- **未翻译的页面在英文站直接 404**，不静默回退中文（`lib/i18n.ts` 的 `fallbackLanguage: null`），
+  所以读者看到的英文永远是最新的；需要某页英文时，在 `content/docs/en/` 放同路径文件即可
+- 检索与 RAG 按语言隔离：索引按 `Doc.path` 的语言前缀过滤，英文提问只召回英文文档
+- 界面文案：导航 / 页脚 / 品牌跟随语言（`lib/shared.ts` 的 `brand`、`lib/layout.shared.tsx` 的 `nav`）；
+  `content/` 之外的营销文案目前仍为中文
 
 ## 内容在哪、怎么存
 
 `content/` 是内容根目录（部署时挂到 `data/content` 卷）：
 
-- `docs/` 已发布文档（`.md` / `.mdx`），`drafts/` 草稿，`media/` 图片
+- `docs/` 已发布文档（`.md` / `.mdx`，按语言分子目录 `zh/`、`en/`），`drafts/` 草稿，`media/` 图片
 - 该目录本身是 git 仓库：每次发布/回滚自动提交，版本历史就是 git 历史
 - 侧栏由各目录的 `meta.json` 控制（标题、排序、图标），后台「侧栏配置」可视化编辑
 - 发布即生效，无需重建镜像
@@ -75,10 +85,10 @@ docker compose exec web node scripts/check-ai.mjs   # 核对 embedding 实际维
 
 ```bash
 # 内容（唯一不可丢的资产；md 本身就是纯文本 + git 历史）
-tar czf kb-content-$(date +%F).tgz data/content
+tar czf cite-content-$(date +%F).tgz data/content
 
 # 数据库（丢了也能从 content 完整重建：重建索引即可）
-docker compose exec db pg_dump -U kb kb > kb-db-$(date +%F).sql
+docker compose exec db pg_dump -U kb kb > cite-db-$(date +%F).sql
 ```
 
 恢复：内容直接解包回 `data/content`；数据库 `psql < 备份.sql` 或直接空库 + 重建索引。

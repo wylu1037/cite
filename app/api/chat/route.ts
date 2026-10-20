@@ -21,13 +21,24 @@ function sse(obj: unknown): string {
   return `data: ${JSON.stringify(obj)}\n\n`;
 }
 
-function buildSystemPrompt(sources: SourceRef[]): string {
+function buildSystemPrompt(sources: SourceRef[], locale: string): string {
   const ctx = sources
     .map(
       (s, i) =>
         `[${i + 1}] ${s.title}${s.heading ? `（${s.heading}）` : ''} ${s.url}\n${s.content}`
     )
     .join('\n\n');
+
+  if (locale === 'en') {
+    return `You are the assistant for the department knowledge base. Answer only from the "sources" below.
+- Cite with bracket numbers at the end of the sentence, e.g. [1]; multiple as [1][2]
+- If the sources are insufficient, say you could not find it and suggest searching the docs or rephrasing
+- Answer in English, concise and direct, never invent content beyond the sources
+
+Sources:
+${ctx || '(no relevant sources)'}`;
+  }
+
   return `你是公司内部知识库的问答助手，只依据下面「资料」中的内容回答用户问题：
 - 引用资料时在句末标注编号，如 [1]；引用多条写作 [1][2]
 - 资料不足以回答时，明确说没找到，并建议到 /docs 站内搜索或更换问法
@@ -37,11 +48,17 @@ function buildSystemPrompt(sources: SourceRef[]): string {
 ${ctx || '（暂无相关资料）'}`;
 }
 
-async function retrieve(question: string): Promise<SourceRef[]> {
+async function retrieve(
+  question: string,
+  locale: string
+): Promise<SourceRef[]> {
   const qvec = await embedOne(question);
+  // 检索分语言：Doc.path 以语言目录开头（zh/… 或 en/…）
+  const prefix = `${locale === 'en' ? 'en' : 'zh'}/%`;
   const rows = await prisma.$queryRaw<SourceRef[]>`
     SELECT d."title", d."url", c."heading", c."content"
     FROM "Chunk" c JOIN "Doc" d ON d."id" = c."docId"
+    WHERE d."path" LIKE ${prefix}
     ORDER BY c."embedding" <=> ${vecLiteral(qvec)}::vector ASC
     LIMIT ${TOP_K}`;
   // 按文档去重，保留每篇最相关的一两块
@@ -59,7 +76,9 @@ async function retrieve(question: string): Promise<SourceRef[]> {
 export async function POST(request: Request) {
   const body = (await request.json().catch(() => null)) as {
     messages?: ChatMessage[];
+    locale?: string;
   } | null;
+  const locale = body?.locale === 'en' ? 'en' : 'zh';
   const messages = (body?.messages ?? [])
     .filter((m) => m && typeof m.content === 'string' && m.content.trim())
     .slice(-8);
@@ -72,7 +91,7 @@ export async function POST(request: Request) {
 
   let sources: SourceRef[] = [];
   try {
-    sources = await retrieve(question);
+    sources = await retrieve(question, locale);
   } catch (e) {
     console.error('[chat] 检索失败，降级为直答：', e);
   }
@@ -108,7 +127,7 @@ export async function POST(request: Request) {
         max_tokens: Number(process.env.LLM_MAX_TOKENS || 2048),
         stream: true,
         messages: [
-          { role: 'system', content: buildSystemPrompt(sources) },
+          { role: 'system', content: buildSystemPrompt(sources, locale) },
           ...messages,
         ],
       }),
