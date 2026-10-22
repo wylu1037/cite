@@ -7,9 +7,8 @@ export default async function NewDocPage() {
   const categories = await listDocCategories();
 
   return (
-    <main className="mx-auto w-full max-w-2xl flex-1 p-6">
-      <h1 className="mb-4 text-2xl font-bold">新建文档</h1>
+    <div className="w-full flex-1 p-6 lg:p-8">
       <NewDocForm categories={categories} />
-    </main>
+    </div>
   );
 }

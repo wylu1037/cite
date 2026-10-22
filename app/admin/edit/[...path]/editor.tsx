@@ -3,8 +3,9 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Button } from '@/components/ui/button';
+import { Button, buttonVariants } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { cn } from '@/lib/utils';
 import {
   Card,
   CardContent,
@@ -189,11 +190,15 @@ export function Editor({ path }: { path: string }) {
       {/* Top Header Bar */}
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-linear-hairline pb-4">
         <div className="flex items-center gap-3">
-          <Link href="/admin">
-            <Button variant="ghost" size="sm" className="h-7 text-xs">
-              <ArrowLeft className="mr-1 h-3.5 w-3.5" />
-              返回
-            </Button>
+          <Link
+            href="/admin"
+            className={cn(
+              buttonVariants({ variant: 'ghost', size: 'sm' }),
+              'h-8 text-xs'
+            )}
+          >
+            <ArrowLeft className="mr-1 h-3.5 w-3.5" />
+            <span>返回</span>
           </Link>
           <div className="flex items-center gap-2">
             <span className="rounded-[6px] border border-linear-hairline bg-linear-surface-2 px-2 py-0.5 font-mono text-xs text-linear-ink">
@@ -217,15 +222,17 @@ export function Editor({ path }: { path: string }) {
 
         <div className="flex items-center gap-2">
           {published && (
-            <a href={siteUrl} target="_blank" rel="noreferrer">
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-7 text-xs text-linear-ink-subtle hover:text-linear-ink"
-              >
-                <ExternalLink className="mr-1 h-3 w-3" />
-                前台查看
-              </Button>
+            <a
+              href={siteUrl}
+              target="_blank"
+              rel="noreferrer"
+              className={cn(
+                buttonVariants({ variant: 'ghost', size: 'sm' }),
+                'h-8 text-xs text-linear-ink-subtle hover:text-linear-ink'
+              )}
+            >
+              <ExternalLink className="mr-1 h-3 w-3" />
+              <span>前台查看</span>
             </a>
           )}
         </div>
@@ -314,7 +321,7 @@ export function Editor({ path }: { path: string }) {
             <FileCode className="h-3.5 w-3.5 text-linear-primary" />
             Markdown / MDX 源码编辑
           </span>
-          <span className="text-[11px] text-linear-ink-tertiary">
+          <span className="text-xs text-linear-ink-tertiary">
             支持 GitHub Flavored Markdown 与 MDX 扩展语法
           </span>
         </div>

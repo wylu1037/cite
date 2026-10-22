@@ -9,8 +9,8 @@ export default async function EditPage(
   const rel = segments.join('/');
 
   return (
-    <main className="mx-auto w-full max-w-6xl flex-1 p-6 lg:p-8">
+    <div className="w-full flex-1 p-6 lg:p-8">
       <Editor path={rel} />
-    </main>
+    </div>
   );
 }

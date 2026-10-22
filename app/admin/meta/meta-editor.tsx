@@ -4,7 +4,8 @@ import Link from 'next/link';
 import { useCallback, useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
+import { DropdownSelect } from '@/components/ui/dropdown-select';
+import { IconSelect } from '@/components/ui/icon-select';
 import {
   Card,
   CardContent,
@@ -13,15 +14,14 @@ import {
   CardDescription,
 } from '@/components/ui/card';
 import {
-  ArrowLeft,
   Save,
   FolderTree,
+  Folder,
   ChevronUp,
   ChevronDown,
   Plus,
   Trash2,
   CheckCircle2,
-  Info,
   Layers,
   Sparkles,
 } from 'lucide-react';
@@ -102,208 +102,213 @@ export function MetaEditor({ dirs }: { dirs: string[] }) {
   const unlisted = (data?.entries ?? []).filter((e) => !pages.includes(e.name));
 
   return (
-    <main className="mx-auto w-full max-w-4xl flex-1 space-y-6 p-6 lg:p-8">
-      {/* Header */}
-      <div className="flex flex-wrap items-center justify-between gap-4 border-b border-linear-hairline pb-6">
-        <div>
-          <div className="flex items-center gap-2">
-            <h1 className="text-xl font-bold tracking-tight text-linear-ink">
-              侧栏与目录配置
-            </h1>
-            <Badge variant="outline" className="text-xs">
-              meta.json
-            </Badge>
+    <div className="w-full flex-1 space-y-5 p-6 lg:p-8">
+      {/* Top Scope & Action Toolbar (无重复标题与多余分割线，直奔操作) */}
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        {/* Left: Directory / Module Scope Selector */}
+        <div className="flex items-center gap-2.5">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg border border-linear-hairline bg-linear-surface-1 text-linear-primary-hover">
+            <FolderTree className="h-4 w-4" />
           </div>
-          <p className="mt-1 text-xs text-linear-ink-subtle">
-            配置前台文档侧栏的显示名称、Lucide 图标以及文章排列顺序。
-          </p>
+          <div className="flex items-center gap-2">
+            <DropdownSelect
+              value={dir}
+              onChange={setDir}
+              options={dirs.map((d) => ({
+                value: d,
+                label: d ? d : '根目录（content/docs/meta.json）',
+                icon: d ? (
+                  <Folder className="h-3.5 w-3.5 text-linear-primary-hover" />
+                ) : (
+                  <FolderTree className="h-3.5 w-3.5 text-linear-primary-hover" />
+                ),
+              }))}
+              triggerClassName="h-8 min-w-56"
+            />
+            <span className="font-mono text-xs text-linear-ink-tertiary">
+              meta.json
+            </span>
+          </div>
         </div>
 
+        {/* Right: Actions */}
         <div className="flex items-center gap-2">
-          <Link href="/admin">
-            <Button variant="ghost" size="sm" className="h-8 text-xs">
-              <ArrowLeft className="mr-1 h-3.5 w-3.5" />
-              返回文档列表
-            </Button>
-          </Link>
           <Button
             variant="primary"
             size="sm"
             onClick={save}
             disabled={busy || !data}
-            className="h-8"
+            className="h-8 text-xs font-medium"
           >
-            <Save className="mr-1 h-3.5 w-3.5" />
+            <Save className="mr-1.5 h-3.5 w-3.5" />
             {busy ? '保存中…' : '保存配置'}
           </Button>
         </div>
       </div>
 
+      {/* Status Feedback Notification */}
       {msg && (
-        <div className="flex items-center gap-2 rounded-[8px] border border-linear-primary/30 bg-linear-primary/10 p-3 text-xs text-linear-ink-muted">
+        <div className="flex items-center gap-2 rounded-lg border border-linear-primary/30 bg-linear-primary/10 p-3 text-xs text-linear-ink-muted">
           <CheckCircle2 className="h-4 w-4 shrink-0 text-linear-primary-hover" />
           <span>{msg}</span>
         </div>
       )}
 
-      {/* Directory Selector Card */}
-      <Card className="border-linear-hairline bg-linear-surface-1">
-        <CardContent className="space-y-2 p-4">
-          <label className="flex items-center gap-1.5 text-xs font-medium text-linear-ink-muted">
-            <FolderTree className="h-3.5 w-3.5 text-linear-primary" />
-            选择要配置的板块目录
-          </label>
-          <select
-            value={dir}
-            onChange={(e) => setDir(e.target.value)}
-            className="w-full rounded-[8px] border border-linear-hairline bg-linear-surface-2 px-3 py-2 text-xs text-linear-ink focus:border-linear-primary focus:outline-none"
-          >
-            {dirs.map((d) => (
-              <option key={d} value={d}>
-                {d ? `📁 ${d}` : '🏠 根目录（content/docs/meta.json）'}
-              </option>
-            ))}
-          </select>
-        </CardContent>
-      </Card>
-
-      {/* Form Details Card */}
-      <Card className="border-linear-hairline bg-linear-surface-1">
-        <CardHeader className="pb-4">
-          <CardTitle className="text-sm font-semibold text-linear-ink">
-            目录元属性
-          </CardTitle>
-          <CardDescription className="text-xs text-linear-ink-subtle">
-            设置此目录在前台侧栏显示的展示标题与图标
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <div className="space-y-1.5">
-              <label className="text-xs font-medium text-linear-ink-muted">
-                展示标题
-              </label>
-              <Input
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                placeholder="例如：快速上手、部署运维"
-                className="text-xs"
-              />
-            </div>
-            <div className="space-y-1.5">
-              <label className="text-xs font-medium text-linear-ink-muted">
-                Lucide 图标名（选填）
-              </label>
-              <Input
-                value={icon}
-                onChange={(e) => setIcon(e.target.value)}
-                placeholder="例如：Rocket, BookOpen, Code, Server"
-                className="font-mono text-xs"
-              />
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Pages Ordering Card */}
-      <Card className="border-linear-hairline bg-linear-surface-1">
-        <CardHeader className="pb-3">
-          <div className="flex items-center justify-between">
-            <div>
-              <CardTitle className="flex items-center gap-2 text-sm font-semibold text-linear-ink">
-                <Layers className="h-4 w-4 text-linear-primary" />
-                侧栏文章排序（已列出 {pages.length} 项）
+      {/* Responsive Grid Layout: Left Properties, Right Ordering */}
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-12">
+        {/* Left Column: Scope Properties & Guidance (5 cols on xl) */}
+        <div className="space-y-6 xl:col-span-5">
+          {/* Form Details Card */}
+          <Card className="border-linear-hairline bg-linear-surface-1">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-semibold text-linear-ink">
+                目录元属性
               </CardTitle>
               <CardDescription className="text-xs text-linear-ink-subtle">
-                按自上而下的顺序显示，可使用箭头调整顺序或从侧栏隐藏
+                设置当前板块在前台侧栏显示的展示标题与图标
               </CardDescription>
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {pages.length === 0 ? (
-            <div className="rounded-[8px] border border-dashed border-linear-hairline p-6 text-center text-xs text-linear-ink-subtle">
-              暂未指定显示顺序（未配置时默认按文件名排序）
-            </div>
-          ) : (
-            <div className="divide-y divide-linear-hairline/60 rounded-[8px] border border-linear-hairline bg-linear-surface-2/60">
-              {pages.map((p, i) => (
-                <div
-                  key={p}
-                  className="flex items-center justify-between px-3 py-2 text-xs transition-colors hover:bg-linear-surface-2"
-                >
-                  <div className="flex items-center gap-2.5">
-                    <span className="w-5 font-mono text-[11px] text-linear-ink-tertiary">
-                      {(i + 1).toString().padStart(2, '0')}
-                    </span>
-                    <span className="font-medium text-linear-ink">
-                      {titleOf(p) ?? p}
-                    </span>
-                    <span className="font-mono text-[10px] text-linear-ink-subtle">
-                      ({p})
-                    </span>
-                  </div>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-1.5">
+                <label className="text-xs font-medium text-linear-ink-muted">
+                  展示标题
+                </label>
+                <Input
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  placeholder="例如：快速上手、部署运维"
+                  className="text-xs bg-linear-surface-2 border-linear-hairline"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <label className="flex items-center justify-between text-xs font-medium text-linear-ink-muted">
+                  <span>Lucide 侧栏图标</span>
+                  <span className="text-xs text-linear-ink-tertiary">
+                    点击预览并下拉选择
+                  </span>
+                </label>
+                <IconSelect
+                  value={icon}
+                  onChange={setIcon}
+                />
+              </div>
+            </CardContent>
+          </Card>
 
-                  <div className="flex items-center gap-1">
-                    <Button
-                      variant="ghost"
-                      size="icon-sm"
-                      onClick={() => move(i, -1)}
-                      disabled={i === 0}
-                      title="上移"
+          {/* Quick Tips */}
+          <div className="rounded-xl border border-linear-hairline bg-linear-surface-1/40 p-4 text-xs text-linear-ink-subtle space-y-1.5">
+            <div className="flex items-center gap-1.5 font-medium text-linear-ink">
+              <Sparkles className="h-3.5 w-3.5 text-linear-primary-hover" />
+              <span>配置提示</span>
+            </div>
+            <p>
+              修改展示标题和图标后，点击右上角「保存配置」即可即时在前台侧栏生效，无需重启开发服务。
+            </p>
+          </div>
+        </div>
+
+        {/* Right Column: Pages Ordering Card (7 cols on xl) */}
+        <div className="space-y-6 xl:col-span-7">
+          <Card className="border-linear-hairline bg-linear-surface-1">
+            <CardHeader className="pb-3">
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle className="flex items-center gap-2 text-sm font-semibold text-linear-ink">
+                    <Layers className="h-4 w-4 text-linear-primary" />
+                    侧栏文章排序（已列出 {pages.length} 项）
+                  </CardTitle>
+                  <CardDescription className="text-xs text-linear-ink-subtle">
+                    按自上而下的顺序显示，可使用箭头调整顺序或从侧栏隐藏
+                  </CardDescription>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {pages.length === 0 ? (
+                <div className="rounded-lg border border-dashed border-linear-hairline p-8 text-center text-xs text-linear-ink-subtle">
+                  暂未指定显示顺序（未配置时默认按文件名排序）
+                </div>
+              ) : (
+                <div className="divide-y divide-linear-hairline/60 rounded-lg border border-linear-hairline bg-linear-surface-2/60">
+                  {pages.map((p, i) => (
+                    <div
+                      key={p}
+                      className="flex items-center justify-between px-3 py-2.5 text-xs transition-colors hover:bg-linear-surface-2"
                     >
-                      <ChevronUp className="h-3.5 w-3.5" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon-sm"
-                      onClick={() => move(i, 1)}
-                      disabled={i === pages.length - 1}
-                      title="下移"
-                    >
-                      <ChevronDown className="h-3.5 w-3.5" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon-sm"
-                      className="text-linear-ink-subtle hover:text-[#ff6b6b]"
-                      onClick={() => removeAt(i)}
-                      title="从侧栏移除"
-                    >
-                      <Trash2 className="h-3.5 w-3.5" />
-                    </Button>
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <span className="w-5 font-mono text-xs text-linear-ink-tertiary">
+                          {(i + 1).toString().padStart(2, '0')}
+                        </span>
+                        <span className="truncate font-medium text-linear-ink">
+                          {titleOf(p) ?? p}
+                        </span>
+                        <span className="font-mono text-xs text-linear-ink-subtle">
+                          ({p})
+                        </span>
+                      </div>
+
+                      <div className="flex items-center gap-1 shrink-0">
+                        <Button
+                          variant="ghost"
+                          size="icon-sm"
+                          onClick={() => move(i, -1)}
+                          disabled={i === 0}
+                          title="上移"
+                        >
+                          <ChevronUp className="h-3.5 w-3.5" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon-sm"
+                          onClick={() => move(i, 1)}
+                          disabled={i === pages.length - 1}
+                          title="下移"
+                        >
+                          <ChevronDown className="h-3.5 w-3.5" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon-sm"
+                          className="text-linear-ink-subtle hover:text-[#ff6b6b]"
+                          onClick={() => removeAt(i)}
+                          title="从侧栏移除"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Unlisted documents to add */}
+              {unlisted.length > 0 && (
+                <div className="pt-2">
+                  <label className="mb-2 block text-xs font-medium text-linear-ink-subtle">
+                    可添加到侧栏的文章或子目录：
+                  </label>
+                  <div className="flex flex-wrap gap-2">
+                    {unlisted.map((e) => (
+                      <button
+                        key={e.name}
+                        type="button"
+                        onClick={() => add(e.name)}
+                        className="flex items-center gap-1.5 rounded-md border border-linear-hairline bg-linear-surface-2 px-2.5 py-1 text-xs text-linear-ink-muted transition-colors hover:border-linear-primary hover:text-linear-ink"
+                      >
+                        <Plus className="h-3 w-3 text-linear-primary" />
+                        <span>{e.title || e.name}</span>
+                        <span className="font-mono text-xs text-linear-ink-tertiary">
+                          ({e.name})
+                        </span>
+                      </button>
+                    ))}
                   </div>
                 </div>
-              ))}
-            </div>
-          )}
-
-          {/* Unlisted documents to add */}
-          {unlisted.length > 0 && (
-            <div className="pt-2">
-              <label className="mb-2 block text-xs font-medium text-linear-ink-subtle">
-                可添加到侧栏的文章或子目录：
-              </label>
-              <div className="flex flex-wrap gap-2">
-                {unlisted.map((e) => (
-                  <button
-                    key={e.name}
-                    type="button"
-                    onClick={() => add(e.name)}
-                    className="flex items-center gap-1 rounded-[6px] border border-linear-hairline bg-linear-surface-2 px-2.5 py-1 text-xs text-linear-ink-muted transition-colors hover:border-linear-primary hover:text-linear-ink"
-                  >
-                    <Plus className="h-3 w-3 text-linear-primary" />
-                    <span>{e.title || e.name}</span>
-                    <span className="font-mono text-[10px] text-linear-ink-tertiary">
-                      ({e.name})
-                    </span>
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-        </CardContent>
-      </Card>
-    </main>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    </div>
   );
 }
