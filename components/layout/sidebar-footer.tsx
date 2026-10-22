@@ -22,10 +22,10 @@ import {
   motion,
   useReducedMotion,
 } from 'motion/react';
-import { useEffect, useId, useRef, useState, type MouseEvent } from 'react';
-import { flushSync } from 'react-dom';
+import { useEffect, useId, useState, type MouseEvent } from 'react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
+import { triggerThemeTransition } from './theme-transition';
 
 type ThemeValue = 'light' | 'dark' | 'system';
 
@@ -53,10 +53,6 @@ const THEMES = [
   { value: 'dark', icon: Moon },
   { value: 'system', icon: Monitor },
 ] as const;
-
-/** 强 ease-out：圆形揭示前段迅速铺开，尾段收住 */
-const REVEAL_EASING = 'cubic-bezier(0.23, 1, 0.32, 1)';
-const REVEAL_DURATION = 450;
 
 /** 胶囊内各分段共用的按钮底样式：同高、同圆角、同按压反馈 */
 const segment =
@@ -150,7 +146,6 @@ function ThemeSwitch({ t }: { t: (typeof copy)['zh'] }) {
   const { theme, resolvedTheme, setTheme } = useTheme();
   const reduceMotion = useReducedMotion();
   const [mounted, setMounted] = useState(false);
-  const transitionRef = useRef<ViewTransition | null>(null);
   const groupId = useId();
 
   useEffect(() => {
@@ -167,61 +162,12 @@ function ThemeSwitch({ t }: { t: (typeof copy)['zh'] }) {
           : 'light'
         : next;
 
-    // 外观不变（如 dark → 跟随系统且系统为深色）或浏览器不支持：直接切换，不做过渡
-    if (nextResolved === resolvedTheme || !document.startViewTransition) {
-      setTheme(next);
-      return;
-    }
-
-    // 减少动态：保留浏览器默认的淡入淡出，去掉圆形扩散
-    if (reduceMotion) {
-      document.startViewTransition(() => flushSync(() => setTheme(next)));
-      return;
-    }
-
-    const { left, top, width, height } =
-      e.currentTarget.getBoundingClientRect();
-    const x = left + width / 2;
-    const y = top + height / 2;
-    const radius = Math.hypot(
-      Math.max(x, window.innerWidth - x),
-      Math.max(y, window.innerHeight - y)
-    );
-
-    const root = document.documentElement;
-    root.dataset.themeReveal = '';
-
-    // flushSync 让 next-themes 在快照前同步写入 <html> 的 class，
-    // 否则新旧快照相同，过渡退化为瞬切
-    const transition = document.startViewTransition(() => {
-      flushSync(() => setTheme(next));
-    });
-    transitionRef.current = transition;
-
-    transition.ready
-      .then(() => {
-        root.animate(
-          {
-            clipPath: [
-              `circle(0px at ${x}px ${y}px)`,
-              `circle(${radius}px at ${x}px ${y}px)`,
-            ],
-          },
-          {
-            duration: REVEAL_DURATION,
-            easing: REVEAL_EASING,
-            pseudoElement: '::view-transition-new(root)',
-          }
-        );
-      })
-      .catch(() => {});
-
-    transition.finished.finally(() => {
-      // 连续点击时旧过渡会被中断，只由最后一次负责清理
-      if (transitionRef.current === transition) {
-        delete root.dataset.themeReveal;
-        transitionRef.current = null;
-      }
+    triggerThemeTransition({
+      element: e.currentTarget,
+      nextResolved,
+      resolvedTheme,
+      apply: () => setTheme(next),
+      reduceMotion: Boolean(reduceMotion),
     });
   };
 

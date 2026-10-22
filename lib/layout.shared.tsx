@@ -3,6 +3,11 @@ import { uiTranslations } from 'fumadocs-ui/i18n';
 import { zhCN } from '@fumadocs/language/zh-cn';
 import { ShieldCheck } from 'lucide-react';
 import { Brand } from '@/components/layout/brand';
+import { HeaderThemeToggle } from '@/components/layout/header-theme-toggle';
+import {
+  HeaderLanguageSelect,
+  HeaderLanguageText,
+} from '@/components/layout/language-select';
 import { i18n } from '@/lib/i18n';
 import { brandOf } from '@/lib/shared';
 
@@ -27,6 +32,13 @@ export function baseOptions(locale: string): BaseLayoutProps {
   return {
     nav: {
       title: <Brand locale={locale} />,
+    },
+    slots: {
+      themeSwitch: HeaderThemeToggle,
+      languageSelect: {
+        root: HeaderLanguageSelect,
+        text: HeaderLanguageText,
+      },
     },
     links: [
       { text: t.docs, url: `${prefix}/docs`, active: 'nested-url' },

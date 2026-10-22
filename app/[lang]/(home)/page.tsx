@@ -2,7 +2,6 @@ import type { Metadata } from 'next';
 import { HeroSection } from '@/components/home/hero-section';
 import { KnowledgeTree } from '@/components/home/knowledge-tree';
 import { CoreEngine } from '@/components/home/core-engine';
-import { LivePulse } from '@/components/home/live-pulse';
 import { CtaFooter } from '@/components/home/cta-footer';
 
 export const metadata: Metadata = {
@@ -22,7 +21,6 @@ export default async function HomePage({
       <HeroSection />
       <KnowledgeTree />
       <CoreEngine />
-      <LivePulse />
       <CtaFooter locale={lang} />
     </div>
   );
