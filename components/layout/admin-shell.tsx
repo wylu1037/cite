@@ -94,13 +94,13 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
 
   // 侧边栏内容：与 Docs 侧边栏（宽度 290px、内边距、字体、高亮态及 Footer 胶囊）完全对齐
   const sidebarContent = (
-    <div className="flex h-full flex-col justify-between bg-linear-surface-1/40 p-3 backdrop-blur-xl">
+    <div className="flex h-full flex-col justify-between bg-linear-surface-1/40 p-4 backdrop-blur-xl">
       <div className="flex flex-col">
         {/* Workspace Brand (与 Docs 侧边栏完全对齐，纯粹克制) */}
-        <div className="flex h-11 items-center justify-between px-2">
+        <div className="flex h-11 items-center justify-between">
           <Link
             href="/admin"
-            className="flex items-center gap-2.5 text-sm font-semibold tracking-tight transition-opacity hover:opacity-90"
+            className="flex items-center gap-2.5 text-[15px] font-medium transition-opacity hover:opacity-90"
             onClick={() => setMobileOpen(false)}
           >
             <Brand locale="zh" />
@@ -117,10 +117,10 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
         </div>
 
         {/* Navigation Sections (与 Docs 侧边栏同款条目样式与分组小标题) */}
-        <div className="space-y-5 px-1 py-1">
+        <div className="space-y-5 py-1">
           {/* Group 1: Content Management */}
           <div>
-            <div className="px-2 pb-1.5 text-xs font-semibold tracking-wider text-linear-ink-tertiary uppercase">
+            <div className="px-2 pb-1.5 text-[13px] font-semibold tracking-wider text-linear-ink-tertiary uppercase">
               内容管理
             </div>
             <nav className="space-y-0.5">
@@ -133,13 +133,13 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
                     href={item.href}
                     onClick={() => setMobileOpen(false)}
                     className={cn(
-                      'group flex h-8 items-center justify-between rounded-md px-2.5 text-xs font-medium transition-[color,background-color,scale] duration-150 ease-out active:scale-[0.98]',
+                      'group flex items-center justify-between rounded-lg p-2 text-sm transition-[color,background-color,scale] duration-150 ease-out active:scale-[0.98]',
                       active
                         ? 'bg-linear-surface-3 text-linear-ink shadow-xs ring-1 ring-zinc-700/50'
                         : 'text-linear-ink-subtle hover:bg-linear-surface-2 hover:text-linear-ink'
                     )}
                   >
-                    <div className="flex items-center gap-2.5">
+                    <div className="flex items-center gap-2">
                       <Icon
                         className={cn(
                           'h-4 w-4 transition-colors',
@@ -161,7 +161,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
 
           {/* Group 2: Public Portals */}
           <div>
-            <div className="px-2 pb-1.5 text-xs font-semibold tracking-wider text-linear-ink-tertiary uppercase">
+            <div className="px-2 pb-1.5 text-[13px] font-semibold tracking-wider text-linear-ink-tertiary uppercase">
               前台快捷入口
             </div>
             <nav className="space-y-0.5">
@@ -173,9 +173,9 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
                     href={item.href}
                     target="_blank"
                     rel="noreferrer"
-                    className="group flex h-8 items-center justify-between rounded-md px-2.5 text-xs font-medium text-linear-ink-subtle transition-[color,background-color,scale] duration-150 ease-out hover:bg-linear-surface-2 hover:text-linear-ink active:scale-[0.98]"
+                    className="group flex items-center justify-between rounded-lg p-2 text-sm text-linear-ink-subtle transition-[color,background-color,scale] duration-150 ease-out hover:bg-linear-surface-2 hover:text-linear-ink active:scale-[0.98]"
                   >
-                    <div className="flex items-center gap-2.5">
+                    <div className="flex items-center gap-2">
                       <Icon className="h-4 w-4 text-linear-ink-tertiary group-hover:text-linear-ink" />
                       <span>{item.label}</span>
                     </div>
@@ -191,16 +191,18 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
       {/* Sidebar Footer: 与 Docs 侧边栏 Footer 胶囊同款规格 (高 36px, 圆角 8px, 微边框) */}
       <div className="mt-auto pt-2">
         <div className="flex h-9 w-full items-center justify-between rounded-lg border border-linear-hairline bg-linear-surface-1 p-1 text-xs">
-          {/* 左侧：管理员在线呼吸状态 */}
-          <div className="flex items-center gap-2 px-1.5 min-w-0">
+          {/* 左侧：管理员在线呼吸状态（只留状态点，文案交给 title / aria-label） */}
+          <span
+            role="status"
+            aria-label="管理员在线"
+            title="管理员在线"
+            className="flex h-7 w-7 shrink-0 items-center justify-center"
+          >
             <span className="relative flex h-2 w-2 shrink-0">
               <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
               <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
             </span>
-            <span className="truncate text-xs font-medium text-linear-ink">
-              管理员在线
-            </span>
-          </div>
+          </span>
 
           {/* 右侧操作按钮组 */}
           <div className="flex items-center gap-0.5 shrink-0">
@@ -212,12 +214,12 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
               aria-label="查看前台文档"
               className="inline-flex h-7 w-7 items-center justify-center rounded-md text-linear-ink-subtle transition-[color,background-color] duration-150 hover:bg-linear-surface-3 hover:text-linear-ink"
             >
-              <BookOpen className="h-3.5 w-3.5" />
+              <BookOpen className="h-4 w-4" />
             </Link>
 
             <span
               aria-hidden
-              className="mx-0.5 h-3.5 w-px shrink-0 bg-linear-hairline"
+              className="mx-0.5 h-4 w-px shrink-0 bg-linear-hairline"
             />
 
             <button
@@ -227,7 +229,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
               aria-label="退出登录"
               className="inline-flex h-7 w-7 items-center justify-center rounded-md text-linear-ink-subtle transition-[color,background-color] duration-150 hover:bg-red-500/15 hover:text-red-400 disabled:opacity-50"
             >
-              <LogOut className="h-3.5 w-3.5" />
+              <LogOut className="h-4 w-4" />
             </button>
           </div>
         </div>
